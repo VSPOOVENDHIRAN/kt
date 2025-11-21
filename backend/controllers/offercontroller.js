@@ -8,7 +8,7 @@ async function generateOfferId() {
 }
 
 // ------------------------------
-// CREATE OFFER
+// CREATE OFFER.
 // ------------------------------
 exports.createOffer = async (req, res) => {
   try {
