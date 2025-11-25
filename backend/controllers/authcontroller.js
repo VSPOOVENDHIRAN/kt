@@ -41,7 +41,7 @@ const authController = {
     }
   },
 
-  // Step 3: Verify OTP
+  // Step 3: Verify OTPkdjfkdmdkscmcmsdsdcsdc
   async verifyOtp(req, res) {
     try {
       const { phone, otp } = req.body;
