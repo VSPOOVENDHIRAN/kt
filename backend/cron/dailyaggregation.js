@@ -7,12 +7,9 @@ const cron = require("node-cron");
 // Import your MongoDB model
 const Reading = require("../models/reading"); // adjust path if needed
 
-// Import your blockchain write function
-/////const { writeReadingOnChain } = require("../services/blockchainService"); // adjust path
-
 // Schedule daily aggregation at 23:59
 cron.schedule("59 23 * * *", async () => {
-  console.log("📊 Running daily aggregation...");
+  console.log(" Running daily aggregation...");
 
   const today = new Date();
   const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -51,16 +48,16 @@ cron.schedule("59 23 * * *", async () => {
 
         try {
          ///// await writeReadingOnChain(dailyData);
-          console.log(`✅ Aggregated reading for meter ${meter_id} written to blockchain`);
+          console.log(` Aggregated reading for meter ${meter_id} written to blockchain`);
         } catch (err) {
-          console.error(`❌ Blockchain write failed for meter ${meter_id}:`, err);
+          console.error(` Blockchain write failed for meter ${meter_id}:`, err);
         }
       } else {
-        console.log(`⚠️ No readings found for meter ${meter_id} on ${start.toISOString().split("T")[0]}`);
+        console.log(` No readings found for meter ${meter_id} on ${start.toISOString().split("T")[0]}`);
       }
     }
   } catch (err) {
-    console.error("❌ Daily aggregation error:", err);
+    console.error(" Daily aggregation error:", err);
   }
 });
 

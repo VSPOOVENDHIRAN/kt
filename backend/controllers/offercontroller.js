@@ -86,7 +86,7 @@ exports.createOffer = async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
-     // 🔥 REALTIME EVENT (only to creator)
+    //  REALTIME EVENT (only to creator)
     // ----------------------------------
    const sameTransformerUsers = await User.find({
       transformerid: creator.transformerid
@@ -376,7 +376,7 @@ exports.canceloffer = async (req, res) => {
 
     await session.commitTransaction(); session.endSession();
 
-     // 🔥 REAL-TIME SOCKET UPDATES
+     //  REAL-TIME SOCKET UPDATES
     const users = await User.find({ transformerid: offer.transformerid }).select("user_id");
     users.forEach(u => {
       io.to(u.user_id.toString()).emit("offer_cancelled", {
@@ -559,7 +559,7 @@ if (offer.offer_type === "buy") {
     session.endSession();
 
     
-// ✨ Real-time notification for both parties
+//  Real-time notification for both parties
  const users = await User.find({ transformerid: offer.transformerid }).select("user_id");
     users.forEach(u => {
       io.to(u.user_id.toString()).emit("offer_completed", {
