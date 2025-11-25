@@ -7,6 +7,7 @@ async function generateOfferId() {
   return "OFF" + String(1000 + count + 1);
 }
 
+
 const N = v => (typeof v === "number" ? v : Number(v || 0));
 
 
@@ -14,6 +15,12 @@ const N = v => (typeof v === "number" ? v : Number(v || 0));
 
 exports.createoffer = async (req, res) => {
   const session = await mongoose.startSession();
+
+// ------------------------------
+// CREATE OFFER.
+// ------------------------------
+exports.createOffer = async (req, res) => {
+
   try {
     session.startTransaction();
 
@@ -574,4 +581,4 @@ if (offer.offer_type === "buy") {
     return res.status(500).json({ msg: "Server error", error: err.message });
   }
 };
-
+};
