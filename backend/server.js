@@ -25,22 +25,22 @@ app.use(bodyParser.json());
 
 // ---------------------- MongoDB Connect ----------------------
 mongoose.connect(MONGO_URI)
-    .then(() => console.log("✅ MongoDB connected"))
-    .catch(err => console.error("❌ MongoDB error:", err));
+    .then(() => console.log(" MongoDB connected"))
+    .catch(err => console.error(" MongoDB error:", err));
 
 // ---------------------- Socket.IO Setup ----------------------
 const io = new Server(server, { cors: { origin: "*" } });
 
 io.on("connection", (socket) => {
-    console.log("⚡ Client connected:", socket.id);
+    console.log(" Client connected:", socket.id);
 
     socket.on("register_user", (userId) => {
         socket.join(userId);
-        console.log(`📡 User joined room: ${userId}`);
+        console.log(` User joined room: ${userId}`);
     });
 
     socket.on("disconnect", () => {
-        console.log("❌ Client disconnected:", socket.id);
+        console.log(" Client disconnected:", socket.id);
     });
 });
 
@@ -57,12 +57,12 @@ const { initMQTT } = require("./services/mqttservice");
 initMQTT(MQTT_BROKER, MQTT_TOPIC, io);
 
 // ---------------------- Cron Job ----------------------
-require("./cron/dailyAggregation");
+require("./cron/dailyaggregation");
 app.set("io", io);
 
 
 // ---------------------- Start Server ----------------------
 server.listen(PORT, () => {
-    console.log(`🚀 Backend running on port ${PORT}`);
-    console.log(`🌐 http://localhost:${PORT}`);
+    console.log(` Backend running on port ${PORT}`);
+    console.log(` http://localhost:${PORT}`);
 });

@@ -10,10 +10,10 @@ function initMQTT(brokerURL, topic, io) {
   });
 
   client.on("connect", () => {
-    console.log("✅ MQTT connected");
+    console.log(" MQTT connected");
     client.subscribe(topic, (err) => {
-      if (err) console.log("❌ MQTT subscribe error", err);
-      else console.log("📡 Subscribed:", topic);
+      if (err) console.log(" MQTT subscribe error", err);
+      else console.log(" Subscribed:", topic);
     });
   });
 

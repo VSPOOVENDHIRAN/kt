@@ -131,11 +131,11 @@ const usercontroller = {
       const user = await User.findOne({ meter_id: meterId }).exec();
 
       if (!user) {
-        console.log(`❌ User NOT found for meter: ${meterId}`);
+        console.log(` User NOT found for meter: ${meterId}`);
         return null;
       }
 
-      console.log(`✅ User found: ${user._id}`);
+      console.log(` User found: ${user._id}`);
       return user;
 
     } catch (err) {

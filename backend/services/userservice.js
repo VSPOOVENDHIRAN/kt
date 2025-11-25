@@ -2,23 +2,18 @@
 // The path goes up one directory (../) from 'services' into 'models'.
 const User = require("../models/user"); 
 
-/**
- * Finds a user in the database based on their associated meter ID.
- * This function is used by the reading controller to link incoming meter data to a user account.
- * * @param {string} meterId - The unique ID of the smart meter that sent the reading.
- * @returns {Promise<Object|null>} - The user document if found, or null if no user is linked.
- */
+
 async function findUserByMeterId(meterId) {
     try {
         // Query the MongoDB collection for one user document matching the meter_id
         const user = await User.findOne({ meter_id: meterId }).exec();
 
         if (!user) {
-            console.log("❌ User NOT found for meter:", meterId);
+            console.log(" User NOT found for meter:", meterId);
             return null;
         }
 
-        console.log("✅ User found:", user.name);
+        console.log("User found:", user.name);
         return user;
 
     } catch (err) {
