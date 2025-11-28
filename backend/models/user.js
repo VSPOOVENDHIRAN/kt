@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
   // DEVICE / GRID LINKING
   //-----------------------------------------------------------
   meter_id: { type: String, required: true, unique: true, index: true },
-  transformerid: { type: String, required: true, trim: true },   // From sm_devices
+  transformer_id: { type: String, required: true, trim: true },   // From sm_devices
   grid_id: { type: String, required: true },                     // Feeder/Area ID
 
   //-----------------------------------------------------------

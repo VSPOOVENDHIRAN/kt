@@ -5,10 +5,10 @@ async function handleIncomingReading(topic, message, io) {
   try {
     const payload = JSON.parse(message.toString());
 
-    if (!payload.meter_id) return console.error("❌ Missing meter_id");
+    if (!payload.meter_id) return console.error(" Missing meter_id");
 
     const user = await findUserByMeterId(payload.meter_id);
-    if (!user) return console.error("❌ meter_id not linked");
+    if (!user) return console.error(" meter_id not linked");
 
     payload.import_kwh = Number(payload.import_kwh);
     payload.export_kwh = Number(payload.export_kwh);

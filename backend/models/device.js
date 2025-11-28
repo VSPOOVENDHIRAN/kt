@@ -7,22 +7,22 @@ const smartMeterUserSchema = new mongoose.Schema({
         unique: true, // Unique constraint is crucial for an ID field
         trim: true
     },
-    consumerPhone: {
+    phone: {
         type: String, // Kept as String for consistency and to handle potential leading zeros
         required: true,
         trim: true
     },
-    gridid: {
+    grid_id: {
         type: String,
         required: true,
         trim: true
     },
-    feederId: {
+    feeder_id: {
         type: String,
         required: true,
         trim: true
     },
-    transformerid: {
+    transformer_id: {
         type: String,
         required: true,
         trim: true

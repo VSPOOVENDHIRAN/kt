@@ -14,9 +14,15 @@ const authController = {
       if (!phone) return res.status(400).json({ success: false, message: "Phone required" });
 
       const device = await Device.findOne({ phone });
-      if (!device) return res.status(404).json({ success: false, message: "Device not registered" });
+      if (!device)
+        {  
+          console.log("Device not registered for phone:", phone);
+           return res.status(404).json({ success: false, message: "Device not registered" });
 
-      res.json({ success: true, meter_id: device.meter_id, grid_id: device.grid_id });
+        }
+        console.log("Device found for phone:", phone);
+
+      res.json({ success: true, meter_id: device.meter_id, gridid: device.grid_id });
     } catch (err) {
       console.error(err);
       res.status(500).json({ success: false, message: "Server error" });
@@ -53,6 +59,7 @@ const authController = {
       if (record.otp != otp) return res.status(400).json({ success: false, message: "Invalid OTP" });
 
       delete OTP_STORE[phone];
+      console.log("OTP verified for phone:", phone);
       res.json({ success: true, message: "OTP verified" });
     } catch (err) {
       console.error(err);
@@ -75,19 +82,20 @@ const authController = {
       {
         return res.status(400).json({ error: "Device is in activate" });
       }
-
+       console.log("Device found for registration:", device.meter_id);
      // 2️⃣ Check if email already exists
       const emailExists = await User.findOne({ email });
       if (emailExists) {
         return res.status(400).json({ error: "Email is already registered" });
       }
+      console.log("Email not registered:", email);
 
       // 3️⃣ Check if meter_id already assigned
       const meterAssigned = await User.findOne({ meter_id: device.meter_id });
       if (meterAssigned) {
         return res.status(400).json({ error: "Device already linked to another user" });
       }
-
+       console.log("Meter ID not linked, proceeding with registration:", device.meter_id);
 
       // 3️⃣ Generate user_id
       const lastUser = await User.findOne().sort({ created_at: -1 });
@@ -105,7 +113,7 @@ const authController = {
         password: hashedPassword,
         phone,
         meter_id: device.meter_id,
-        transformerid: device.transformerid ,
+        transformer_id: device.transformer_id ,
         grid_id: device.grid_id,
         wallet_balance: 0,
         energy_balance:0, 
@@ -123,6 +131,7 @@ const authController = {
       });
 
       await newUser.save();
+      console.log("User registered successfully:", newUser.user_id);
 
       res.status(201).json({
         message: "User registered successfully",
@@ -147,7 +156,8 @@ const authController = {
     try {
       const { email, password } = req.body;
       if (!email || !password) return res.status(400).json({ success: false, message: "Email and password required" });
-
+      
+      console.log("Login attempt for email:", email);
       const user = await User.findOne({ email });
       if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
@@ -158,7 +168,7 @@ const authController = {
       await user.save();
 
       const token = jwt.sign({ user_id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
-
+      console.log("Login successful for user:", token);
       res.json({ success: true, user, token });
     } catch (err) {
       console.error(err);

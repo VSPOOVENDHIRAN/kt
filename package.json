@@ -5,9 +5,9 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.20.0",
+    "lucide-react": "^0.555.0",
+    "mongoose": "^9.0.0",
     "mqtt": "^5.14.1",
-    "node-cron": "^4.2.1",
     "socket.io": "^4.8.1"
   }
 }

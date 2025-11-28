@@ -1,5 +1,7 @@
 const Offer = require("../models/offers");
 const User = require("../models/user");
+const mongoose = require("mongoose");
+
 
 //generate unique offer_id
 async function generateOfferId() {
@@ -10,16 +12,12 @@ async function generateOfferId() {
 
 const N = v => (typeof v === "number" ? v : Number(v || 0));
 
-
-//--create offer--//
-
-exports.createoffer = async (req, res) => {
-  const session = await mongoose.startSession();
-
-// ------------------------------
+// -----------------------------
 // CREATE OFFER.
 // ------------------------------
-exports.createOffer = async (req, res) => {
+exports.createoffer = async (req, res) => {
+   const io = req.app.get("io");
+   const session = await mongoose.startSession();
 
   try {
     session.startTransaction();
@@ -49,29 +47,39 @@ exports.createOffer = async (req, res) => {
         session.endSession();
         return res.status(400).json({ msg: "Not enough energy to create sell offer" });
       }
+
+      console.log("Creating sell offer, deducting energy from creator");
       creator.energy_balance = N(creator.energy_balance) - unitsNum;
       creator.reserved_energy = N(creator.reserved_energy) + unitsNum;
-    } else if (offer_type === "buy") {
+
+    } 
+    
+    else if (offer_type === "buy") {
       // must have free tokens
       if (N(creator.token_balance) < totalTokens) {
         await session.abortTransaction();
         session.endSession();
-        return res.status(400).json({ msg: "Not enough tokens to create buy offer" });
+        return res.status(400).
+        json({ msg: "Not enough tokens to create buy offer" });
       }
+
+      console.log("Creating buy offer, deducting tokens from creator");
       creator.token_balance = N(creator.token_balance) - totalTokens;
       creator.reserved_tokens = N(creator.reserved_tokens) + totalTokens;
-    } else {
+    } 
+    
+    else {
       await session.abortTransaction();
       session.endSession();
       return res.status(400).json({ msg: "Invalid offer_type" });
     }
 
-    const offer = new Offers({
+    const offer = new Offer({
       offer_id: await generateOfferId(),
       offer_type,
       creator_id: creator.user_id,
       creator_meter: creator.meter_id,
-      transformerid: creator.transformerid,
+      transformer_id: creator.transformer_id,
       units: unitsNum,
       token_per_unit: tokenPerUnit,
       total_tokens: totalTokens,
@@ -79,7 +87,7 @@ exports.createOffer = async (req, res) => {
       negotiated_tokens: null,
       negotiated_by: null
     });
-
+    console.log("New offer created:", offer.offer_id);
     await creator.save({ session });
     await offer.save({ session });
 
@@ -89,7 +97,7 @@ exports.createOffer = async (req, res) => {
     //  REALTIME EVENT (only to creator)
     // ----------------------------------
    const sameTransformerUsers = await User.find({
-      transformerid: creator.transformerid
+      transformer_id: creator.transformer_id
     }).select("user_id");
 
     sameTransformerUsers.forEach(u => {
@@ -112,6 +120,7 @@ exports.createOffer = async (req, res) => {
 ///---negotiate offer function can be added here---
 
 exports.negotiateoffer = async (req, res) => {
+  const io = req.app.get("io");
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -121,12 +130,16 @@ exports.negotiateoffer = async (req, res) => {
       return res.status(400).json({ msg: "Missing fields" });
     }
 
-    const offer = await Offers.findOne({ offer_id }).session(session);
+    const offer = await Offer.findOne({ offer_id }).session(session);
     if (!offer) return res.status(404).json({ msg: "Offer not found" });
 
     // Creators cannot negotiate
     if (offer.creator_id === user_id) {
       return res.status(400).json({ msg: "Creator cannot negotiate own offer" });
+    }
+
+    if (offer.status !== "negotiation" && offer.status !== "open") {
+      return res.status(400).json({ msg: "offer already completed" });
     }
 
     // Strict — Only ONE negotiator allowed
@@ -223,6 +236,7 @@ exports.negotiateoffer = async (req, res) => {
 //--cancel negotiation function can be added here--
 
 exports.cancelnegotiation = async (req, res) => {
+  const io = req.app.get("io");
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -234,7 +248,7 @@ exports.cancelnegotiation = async (req, res) => {
       return res.status(400).json({ msg: "Missing fields" });
     }
 
-    const offer = await Offers.findOne({ offer_id }).session(session);
+    const offer = await Offer.findOne({ offer_id }).session(session);
     if (!offer) {
       await session.abortTransaction();
       session.endSession();
@@ -321,6 +335,7 @@ exports.cancelnegotiation = async (req, res) => {
 //--cancel offer function can be added here--
 
 exports.canceloffer = async (req, res) => {
+  const io = req.app.get("io");
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -328,7 +343,7 @@ exports.canceloffer = async (req, res) => {
     const { user_id, offer_id } = req.body;
     if (!user_id || !offer_id) { await session.abortTransaction(); session.endSession(); return res.status(400).json({ msg: "Missing fields" }); }
 
-    const offer = await Offers.findOne({ offer_id }).session(session);
+    const offer = await Offer.findOne({ offer_id }).session(session);
     if (!offer) { await session.abortTransaction(); session.endSession(); return res.status(404).json({ msg: "Offer not found" }); }
 
     if (offer.creator_id !== user_id) { await session.abortTransaction(); session.endSession(); return res.status(403).json({ msg: "Only creator can cancel" }); }
@@ -370,7 +385,7 @@ exports.canceloffer = async (req, res) => {
     offer.status = "cancelled";
     offer.negotiated_by = null;
     offer.negotiated_tokens = null;
-
+    offer.completed_at = new Date();
     await creator.save({ session });
     await offer.save({ session });
 
@@ -396,12 +411,14 @@ exports.canceloffer = async (req, res) => {
 };
 
 exports.acceptoffer = async (req, res) => {
+  const io = req.app.get("io");
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const { offer_id } = req.body;
-    const user_id = req.user.user_id;
+    const { offer_id ,user_id } = req.body;
+
+    //const user_id = req.user.user_id;
 
     // -------------------------------
     // 1. Find Offer
@@ -485,26 +502,29 @@ if (offer.offer_type === "sell") {
     const seller = creator;
     const buyer = counter;
 
-    // Negotiator should have reserved ONLY negotiated amount
-    if (buyer.reserved_tokens < tokensToTrade) {
-        return res.status(400).json({ msg: "Buyer has not reserved enough tokens" });
+    if (offer.status === "negotiation") {
+        // Negotiation accept → buyer must have reserved tokens
+        if (buyer.reserved_tokens < tokensToTrade) {
+            return res.status(400).json({ msg: "Buyer has not reserved enough tokens" });
+        }
+        buyer.reserved_tokens -= tokensToTrade;
+    } else {
+        // Direct accept → deduct directly from buyer's token_balance
+        if (buyer.token_balance < tokensToTrade) {
+            return res.status(400).json({ msg: "Buyer does not have enough tokens" });
+        }
+        buyer.token_balance -= tokensToTrade;
     }
 
-    // Deduct ONLY negotiated price
-    buyer.reserved_tokens -= tokensToTrade;
-
-    // Seller receives ONLY negotiated final price
+    // Seller receives tokens
     seller.token_balance += tokensToTrade;
 
     // Seller gives energy
     if (seller.reserved_energy < offer.units) {
         return res.status(400).json({ msg: "Seller does not have enough reserved energy" });
     }
-
     seller.reserved_energy -= offer.units;
     buyer.energy_balance += offer.units;
-
-    // No refund required because buyer reserved exact negotiated price
 }
 
 
@@ -517,24 +537,29 @@ if (offer.offer_type === "sell") {
 // =======================================================
 if (offer.offer_type === "buy") {
     const buyer = creator;   // offer creator
-    const seller = counter;  // negotiator
+    const seller = counter;  // counterparty
 
-    // Buyer must have reserved exactly negotiated tokens
-    if (buyer.reserved_tokens < tokensToTrade) {
-        return res.status(400).json({ msg: "Buyer has not reserved enough tokens" });
+    if (offer.status === "negotiation") {
+        // Negotiation accept → buyer must have reserved tokens
+        if (buyer.reserved_tokens < tokensToTrade) {
+            return res.status(400).json({ msg: "Buyer has not reserved enough tokens" });
+        }
+        buyer.reserved_tokens -= tokensToTrade;
+    } else {
+        // Direct accept → buyer pays directly from token_balance
+        if (buyer.token_balance < tokensToTrade) {
+            return res.status(400).json({ msg: "Buyer does not have enough tokens" });
+        }
+        buyer.token_balance -= tokensToTrade;
     }
-
-    // Deduct negotiated amount
-    buyer.reserved_tokens -= tokensToTrade;
 
     // Pay seller
     seller.token_balance += tokensToTrade;
 
     // Seller gives energy
     if (seller.reserved_energy < offer.units) {
-        return res.status(400).json({ msg: "Seller did not reserve enough energy" });
+        return res.status(400).json({ msg: "Seller does not have enough reserved energy" });
     }
-
     seller.reserved_energy -= offer.units;
     buyer.energy_balance += offer.units;
 }
@@ -581,4 +606,40 @@ if (offer.offer_type === "buy") {
     return res.status(500).json({ msg: "Server error", error: err.message });
   }
 };
+
+
+// Fetch closed offers from last 20 days for the same transformer as the requester
+
+exports.getClosedOffersLast30Days = async (req, res) => {
+  try {
+    const userTransformer = req.user.transformer_id;
+    if (!userTransformer) {
+      return res.status(400).json({
+        success: false,
+        message: "Transformer ID missing for this user"
+      });
+    }
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const closedOffers = await Offer.find({
+      transformer_id: userTransformer,
+      status: { $in: ["completed", "cancelled"] },
+      completed_at: { $gte: thirtyDaysAgo }  // works for both completed & cancelled
+    }).sort({ completed_at: -1 });
+
+    return res.status(200).json({
+      success: true,
+      data: closedOffers
+    });
+
+  } catch (err) {
+    console.error("Error fetching closed offers:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while fetching closed offers"
+    });
+  }
 };
+
