@@ -69,7 +69,7 @@ def generate_meter_data(meter_id, period):
     if period == "morning_rush":
         load_kw = random.uniform(2.0, 3.5)
     elif period == "day_normal":
-        load_kw = random.uniform(1.0, 2.0)
+        load_kw = random.uniform(1000.0, 2000.0)
     elif period == "evening_rush":
         load_kw = random.uniform(2.0, 3.5)
     else:  # night_free

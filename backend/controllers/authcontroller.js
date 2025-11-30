@@ -72,7 +72,7 @@ const authController = {
     try {
       const { name, email, password, phone } = req.body;
 
-      // 1️⃣ Check if device exists
+      // 1 Check if device exists
       const device = await Device.findOne({ phone });
       if (!device) {
         return res.status(400).json({ error: "Device not registered" });
@@ -83,29 +83,29 @@ const authController = {
         return res.status(400).json({ error: "Device is in activate" });
       }
        console.log("Device found for registration:", device.meter_id);
-     // 2️⃣ Check if email already exists
+     // 2 Check if email already exists
       const emailExists = await User.findOne({ email });
       if (emailExists) {
         return res.status(400).json({ error: "Email is already registered" });
       }
       console.log("Email not registered:", email);
 
-      // 3️⃣ Check if meter_id already assigned
+      // 3️ Check if meter_id already assigned
       const meterAssigned = await User.findOne({ meter_id: device.meter_id });
       if (meterAssigned) {
         return res.status(400).json({ error: "Device already linked to another user" });
       }
        console.log("Meter ID not linked, proceeding with registration:", device.meter_id);
 
-      // 3️⃣ Generate user_id
+      // 3️ Generate user_id
       const lastUser = await User.findOne().sort({ created_at: -1 });
       const lastNumber = lastUser ? parseInt(lastUser.user_id.replace("USR", "")) : 1000;
       const user_id = "USR" + (lastNumber + 1);
 
-      // 4️⃣ Hash password
+      // 4️ Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // 5️⃣ Save user
+      // 5️ Save user
       const newUser = new User({
         user_id,
         name,

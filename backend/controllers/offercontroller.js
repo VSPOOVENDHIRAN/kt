@@ -43,6 +43,7 @@ exports.createoffer = async (req, res) => {
     if (offer_type === "sell") {
       // must have free energy
       if (N(creator.energy_balance) < unitsNum) {
+        console.log(creator.energy_balance, unitsNum);
         await session.abortTransaction();
         session.endSession();
         return res.status(400).json({ msg: "Not enough energy to create sell offer" });
@@ -108,7 +109,7 @@ exports.createoffer = async (req, res) => {
     });
 
 
-    return res.json({ msg: "Offer created", offer });
+    return res.json({ success: true,msg: "Offer created", offer });
   } catch (err) {
     try { await session.abortTransaction(); } catch(_) {}
     session.endSession();
@@ -126,24 +127,28 @@ exports.negotiateoffer = async (req, res) => {
     session.startTransaction();
 
     const { user_id, offer_id, new_token_per_unit } = req.body;
-    if (!user_id || !offer_id || new_token_per_unit == null) {
-      return res.status(400).json({ msg: "Missing fields" });
-    }
+    //if (!user_id || !offer_id || new_token_per_unit == null) {
+    //  console.log("Negotiate offer request missing fields:", req.body);
+    //  return res.status(400).json({ msg: "Missing fields" });
+    //}
 
     const offer = await Offer.findOne({ offer_id }).session(session);
     if (!offer) return res.status(404).json({ msg: "Offer not found" });
 
     // Creators cannot negotiate
     if (offer.creator_id === user_id) {
+      console.log("Creator attempted to negotiate own offer:", offer.offer_id);
       return res.status(400).json({ msg: "Creator cannot negotiate own offer" });
     }
 
     if (offer.status !== "negotiation" && offer.status !== "open") {
+      console.log("Offer not open for negotiation:", offer.offer_id, "Status:", offer.status);
       return res.status(400).json({ msg: "offer already completed" });
     }
 
     // Strict — Only ONE negotiator allowed
     if (offer.status === "negotiation" && offer.negotiated_by !== user_id) {
+      console.log("Offer already in negotiation by another user:", offer.offer_id);
       return res.status(400).json({ msg: "Offer already in negotiation by another user" });
     }
 
@@ -166,6 +171,7 @@ exports.negotiateoffer = async (req, res) => {
       const oldTokens = N(offer.negotiated_tokens || 0);
 
       if (offer.offer_type === "sell") {
+        console.log("Refunding old token reservation:", oldTokens);
         negotiator.reserved_tokens -= oldTokens;
         negotiator.token_balance += oldTokens;
       } else {
@@ -178,6 +184,7 @@ exports.negotiateoffer = async (req, res) => {
     if (offer.offer_type === "sell") {
       // BUYER must reserve tokens
       if (negotiator.token_balance < newTotalTokens) {
+        console.log("Not enough tokens to negotiate:", negotiator.token_balance, "required:", newTotalTokens);
         return res.status(400).json({ msg: "Not enough tokens to negotiate" });
       }
       negotiator.token_balance -= newTotalTokens;
@@ -220,8 +227,8 @@ exports.negotiateoffer = async (req, res) => {
     });
 
 
-
-    return res.json({ msg: "Negotiation updated", offer });
+    console.log("Negotiation updated for offer:", offer.offer_id);
+    return res.json({ success: true ,msg: "Negotiation updated", offer });
 
   } catch (err) {
     await session.abortTransaction();
@@ -318,6 +325,7 @@ exports.cancelnegotiation = async (req, res) => {
     });
 
     return res.json({
+      success: true,
       msg: "Negotiation cancelled successfully",
       offer
     });
@@ -341,27 +349,52 @@ exports.canceloffer = async (req, res) => {
     session.startTransaction();
 
     const { user_id, offer_id } = req.body;
-    if (!user_id || !offer_id) { await session.abortTransaction(); session.endSession(); return res.status(400).json({ msg: "Missing fields" }); }
+    if(!user_id )
+      console.log("user_id missing");
+    if(!offer_id )
+      console.log("offer_id missing");
 
+    if (!user_id || !offer_id) { 
+      console.log("Cancel offer request:", user_id, offer_id);
+      await session.abortTransaction(); session.endSession(); return res.status(400).json({ msg: "Missing fields" });
+     }
+
+    
     const offer = await Offer.findOne({ offer_id }).session(session);
-    if (!offer) { await session.abortTransaction(); session.endSession(); return res.status(404).json({ msg: "Offer not found" }); }
 
-    if (offer.creator_id !== user_id) { await session.abortTransaction(); session.endSession(); return res.status(403).json({ msg: "Only creator can cancel" }); }
+    if (!offer) { 
+      console.log("Offer not found for ID:", offer_id);
+      await session.abortTransaction(); session.endSession(); 
+      return res.status(404).json({ msg: "Offer not found" }); 
+    }
+  // console.log("Offer found:", offer.offer_id, "Status:", offer.status);
+    if (offer.creator_id !== user_id) {
+      console.log("User is not creator:", user_id, "Creator:", offer.creator_id);
+      await session.abortTransaction(); session.endSession(); 
+      return res.status(403).json({ msg: "Only creator can cancel" });
+     }
+  // console.log("User is creator");
 
     if (!["open", "negotiation"].includes(offer.status)) { await session.abortTransaction(); session.endSession(); return res.status(400).json({ msg: "Cannot cancel in current status" }); }
 
     const creator = await User.findOne({ user_id: offer.creator_id }).session(session);
-    if (!creator) { await session.abortTransaction(); session.endSession(); return res.status(404).json({ msg: "Creator not found" }); }
-
+    if (!creator) { 
+       console.log("Creator not found");
+      await session.abortTransaction(); session.endSession(); return res.status(404).json({ msg: "Creator not found" }); }
+    
     // Release creator reserved portion
     if (offer.offer_type === "sell") {
       // restore seller reserved energy
+      console.log("Restoring reserved energy to creator");
       creator.reserved_energy = Math.max(0, N(creator.reserved_energy) - N(offer.units));
       creator.energy_balance = N(creator.energy_balance) + N(offer.units);
+      console.log("Creator energy balance after restore:", creator.energy_balance);
     } else if (offer.offer_type === "buy") {
       // restore tokens reserved by creator
+      console.log("Restoring reserved tokens to creator");
       creator.reserved_tokens = Math.max(0, N(creator.reserved_tokens) - N(offer.total_tokens));
       creator.wallet_balance = N(creator.wallet_balance) + N(offer.total_tokens);
+      console.log("Creator wallet balance after restore:", creator.wallet_balance);
     }
 
     // If negotiator exists, refund their reservation
@@ -400,7 +433,8 @@ exports.canceloffer = async (req, res) => {
       });
     });
 
-    return res.json({ msg: "Offer cancelled and reservations released", offer });
+    return res.json({ success: true, msg: "Offer cancelled and reservations released", offer });
+
 
   } catch (err) {
     try { await session.abortTransaction(); } catch(_) {}
@@ -450,7 +484,7 @@ exports.acceptoffer = async (req, res) => {
         await session.abortTransaction(); session.endSession();
         return res.status(400).json({ msg: "Creator cannot accept own offer" });
       }
-
+      console.log("Direct accept detected");
       counterpartyId = user_id;
       tokensToTrade = offer.total_tokens;
     }
@@ -481,6 +515,7 @@ exports.acceptoffer = async (req, res) => {
     // -------------------------------
     const counter = await User.findOne({ user_id: counterpartyId }).session(session);
     if (!counter) {
+      console.log("Counterparty not found:", counterpartyId);
       await session.abortTransaction(); session.endSession();
       return res.status(404).json({ msg: "Counterparty not found" });
     }
@@ -509,8 +544,10 @@ if (offer.offer_type === "sell") {
         }
         buyer.reserved_tokens -= tokensToTrade;
     } else {
+      console.log("Direct accept processing for SELL offer");
         // Direct accept → deduct directly from buyer's token_balance
         if (buyer.token_balance < tokensToTrade) {
+          console.log("Buyer does not have enough tokens:", buyer.token_balance, "required:", tokensToTrade);
             return res.status(400).json({ msg: "Buyer does not have enough tokens" });
         }
         buyer.token_balance -= tokensToTrade;
@@ -521,6 +558,7 @@ if (offer.offer_type === "sell") {
 
     // Seller gives energy
     if (seller.reserved_energy < offer.units) {
+        console.log("Seller does not have enough reserved energy:", seller.reserved_energy, "required:", offer.units);
         return res.status(400).json({ msg: "Seller does not have enough reserved energy" });
     }
     seller.reserved_energy -= offer.units;
@@ -594,6 +632,7 @@ if (offer.offer_type === "buy") {
     });
 
     return res.status(200).json({
+      success: true,
       msg: "Offer accepted successfully",
       traded_tokens: tokensToTrade,
       offer
@@ -641,5 +680,98 @@ exports.getClosedOffersLast30Days = async (req, res) => {
       message: "Server error while fetching closed offers"
     });
   }
+};// File: trade-offers-controller.js
+exports.getCurrentTradeOffers = async (req, res) => {
+  try {
+     // FIX: Ensure consistent destructuring from req.user
+    // Use the consistent naming from the auth middleware/req.user object:
+    const { transformer_id: transformer, user_id: loggedInUser } = req.user || {}; 
+
+    // Check for missing Transformer ID (400 Bad Request)
+    if (!transformer) {
+      return res.status(400).json({
+        success: false,
+        message: "Transformer ID missing for this user. Cannot fetch market offers."
+      });
+    }
+
+    // Check for missing User ID (401 Unauthorized - relies on auth)
+    if (!loggedInUser) {
+        // This check is mainly for defense, as the auth middleware should catch it first
+        return res.status(401).json({ 
+           success: false,
+            message: "User ID is missing on the request object. Authentication failed."
+           });
+         }
+
+     console.log("Fetching market offers for user:", loggedInUser, "Transformer:", transformer);
+
+    const ACTIVE_STATUSES = ["open", "negotiation"];
+
+    //  Database Query (now correctly uses the consistent loggedInUser/user_id)
+    const marketOffers = await Offer.find({
+      transformer_id: transformer,
+      creator_id: { $ne: loggedInUser },  // exclude MY offers using user_id
+      status: { $in: ACTIVE_STATUSES } // only active offers
+    }).sort({ created_at: -1 });
+
+    return res.status(200).json({
+      success: true,
+      data: marketOffers
+    });
+
+  } catch (err) {
+    console.error("Error fetching current trade offers:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while fetching current trade offers"
+    });
+  }
 };
 
+
+
+exports.getOwnTradeOffers = async (req, res) => {
+  try {
+    // FIX: Access user information consistently from req.user
+    const { transformer_id: userTransformer, user_id: loggedInUser } = req.user || {};
+
+    if (!userTransformer) {
+      return res.status(400).json({
+        success: false,
+        message: "Transformer ID missing for this user"
+      });
+    }
+   
+    // Defensive check for loggedInUser, matching getCurrentTradeOffers
+    if (!loggedInUser) {
+     return res.status(401).json({ 
+   success: false, 
+          message: "User ID is missing on the request object. Authentication failed."
+     });
+    }
+
+    console.log("Fetching own offers for user:", loggedInUser, "at transformer:", userTransformer);
+    
+   // Fetch ONLY *MY OWN* offers
+    const myOffers = await Offer.find({
+  transformer_id: userTransformer,
+  creator_id: loggedInUser,
+  status: { $in: ["open", "negotiation"] }
+});
+
+
+
+    return res.status(200).json({
+     success: true,
+     data: myOffers
+    });
+
+  } catch (err) {
+    console.error("Error fetching current trade offers:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while fetching own trade offers" // Changed message for clarity
+    });
+ }
+};

@@ -51,6 +51,7 @@ export default function Login() {
 
     if (data.token) {
       localStorage.setItem("token", data.token);
+      localStorage.setItem("user_id", data.user.user_id);
       navigate("/profile");
     } else if (data.networkError) {
       setError(data.message); // "Cannot reach server..."

@@ -8,7 +8,7 @@ const cron = require("node-cron");
 const Reading = require("../models/reading"); // adjust path if needed
 
 // Schedule daily aggregation at 23:59
-cron.schedule("59 16 * * *", async () => {
+cron.schedule("59 23 * * *", async () => {
   console.log(" Running daily aggregation...");
 
   const today = new Date();

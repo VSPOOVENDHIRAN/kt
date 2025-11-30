@@ -1,7 +1,7 @@
 const API = "http://localhost:5001";
 
 // -------------------------------
-// Helper – Get Auth Header
+// Helper – Auth Header
 // -------------------------------
 const authHeader = () => {
   const token = localStorage.getItem("token");
@@ -55,7 +55,6 @@ export const changePassword = async (currentPassword, newPassword) => {
     headers: authHeader(),
     body: JSON.stringify({ currentPassword, newPassword }),
   });
-
   return response.json();
 };
 
@@ -67,7 +66,6 @@ export const getBalances = async () => {
     method: "GET",
     headers: authHeader(),
   });
-
   return response.json();
 };
 
@@ -80,7 +78,6 @@ export const updateBalances = async (wallet, tokens, energy) => {
     headers: authHeader(),
     body: JSON.stringify({ wallet, tokens, energy }),
   });
-
   return response.json();
 };
 
@@ -92,6 +89,33 @@ export const getTechnicalInfo = async () => {
     method: "GET",
     headers: authHeader(),
   });
+  return response.json();
+};
 
+// -------------------------------
+// 8. Offers API
+// -------------------------------
+
+// Get current offers
+export const getCurrentOffers = async () => {
+  const response = await fetch(`${API}/api/offers/current`, {
+    method: "GET",
+    headers: authHeader(),
+  });
+  return response.json();
+};
+
+// Create a new offer
+export const createOffer = async (offer) => {
+  const response = await fetch(`${API}/api/offers/create`, {
+    method: "POST",
+    headers: authHeader(),
+    body: JSON.stringify({
+      creator_id: localStorage.getItem("user_id"), // must store after login
+      offer_type: offer.offer_type,
+      units: Number(offer.units),
+      token_per_unit: Number(offer.token_per_unit),
+    }),
+  });
   return response.json();
 };

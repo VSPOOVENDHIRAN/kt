@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { io } from "socket.io-client";
+
+
 import {
   WalletIcon,
   CubeIcon,
@@ -13,6 +16,7 @@ import {
 
 // ✅ Use common navigation bar
 import NavigationBar from "../components/navbar.jsx";
+
 
 export default function Profile() {
   const [userData, setUserData] = useState(null);
@@ -52,10 +56,38 @@ export default function Profile() {
 
     setLoading(false);
   };
+useEffect(() => {
+  if (!token) return;
 
-  useEffect(() => {
-    if (token) fetchProfile();
-  }, [token]);
+  // Initial fetch
+  fetchProfile();
+
+  // Connect to socket.io
+  const socket = io("http://localhost:5001", {
+    auth: { token },
+  });
+
+  socket.on("connect", () => console.log("Socket connected:", socket.id));
+
+  socket.on("new_reading", (data) => {
+    console.log("Realtime update received:", data);
+
+    // Merge only the changed fields into userData
+    setUserData((prev) => ({
+      ...prev,
+      energy_balance: data.energy_balance ?? prev.energy_balance,
+      last_import_reading: data.last_import_reading ?? prev.last_import_reading,
+      last_export_reading: data.last_export_reading ?? prev.last_export_reading,
+      total_energy_bought: data.total_energy_bought ?? prev.total_energy_bought,
+      total_energy_sold: data.total_energy_sold ?? prev.total_energy_sold,
+    }));
+  });
+
+  socket.on("disconnect", () => console.log("Socket disconnected"));
+
+  // Cleanup on unmount
+  return () => socket.disconnect();
+}, [token]);
 
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword) {

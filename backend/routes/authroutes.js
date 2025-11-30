@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const authController = require("../controllers/authcontroller");
-const userController = require("../controllers/usercontroller"); // ✅ This is important
+const userController = require("../controllers/usercontroller"); //  This is important
 const authMiddleware = require("../middleware/auth");
 // DEBUG: check types
 console.log("authMiddleware:", typeof authMiddleware);

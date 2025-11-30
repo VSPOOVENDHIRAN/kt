@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import {
   HomeIcon,
   ArrowPathIcon,
@@ -17,9 +18,9 @@ export default function NavigationBar({ active }) {
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md shadow-2xl border-t border-emerald-500/50 flex justify-around p-3 z-50">
       {navItems.map((item) => (
-        <a
+        <Link
           key={item.name}
-          href={item.route}
+          to={item.route}
           className={`flex flex-col items-center gap-1 transition duration-300 p-2 rounded-xl cursor-pointer text-xs font-semibold
             ${
               item.name === active
@@ -30,7 +31,7 @@ export default function NavigationBar({ active }) {
         >
           {item.icon}
           {item.name}
-        </a>
+        </Link>
       ))}
     </div>
   );

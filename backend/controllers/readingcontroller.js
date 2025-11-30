@@ -17,7 +17,28 @@ async function handleIncomingReading(topic, message, io) {
     const doc = new Reading(payload);
     await doc.save();
 
-    io.to(user._id.toString()).emit("new_reading", payload);
+    
+    // --- Update user's last meter readings ---
+    user.last_import_reading = payload.import_kwh;
+    user.last_export_reading = payload.export_kwh;
+
+    // Compute energy balance formula
+    const last_import = user.last_import_reading;
+    const last_export = user.last_export_reading;
+
+    const bought = user.total_energy_bought|| 0;
+    const sold = user.total_energy_sold || 0;
+
+    user.energy_balance = last_export + bought - last_import - sold;
+
+    await user.save();
+
+
+   io.to(user._id.toString()).emit("new_reading", {
+  energy_balance: user.energy_balance,
+  last_import_reading: user.last_import_reading,
+  last_export_reading: user.last_export_reading
+});
 
   } catch (e) {
     console.error("MQTT read error:", e);

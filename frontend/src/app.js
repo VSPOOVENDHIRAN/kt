@@ -4,6 +4,7 @@ import Register from "./pages/register";
 import Dashboard from "./pages/dashboard";
 import Profile from "./pages/profile";
 import History from "./pages/history";
+import TradePage from "./pages/trade";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/history" element={<History />} />
+        <Route path="/trade" element={<TradePage />} />
       </Routes>
     </BrowserRouter>
   );
