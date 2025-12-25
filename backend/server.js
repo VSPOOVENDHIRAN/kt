@@ -8,6 +8,10 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const { Server } = require("socket.io");
+//const ganacheRoutes = require("./ganache/start_ganache");
+const ganacheRoutes = require("./routes/ganacheroutes");
+
+
 
 // MQTT import
 const { initMQTT } = require("./services/mqttservice");
@@ -32,6 +36,9 @@ app.use(cors({
 app.use(express.json());
 app.use(bodyParser.json());
 
+//note: ganache routes
+app.use("/api/ganache", ganacheRoutes);
+//app.use("/api/ganache", ganacheHistoryRoutes);
 // ---------------------- MongoDB Connect ----------------------
 mongoose.connect(MONGO_URI)
     .then(() => console.log("MongoDB connected"))

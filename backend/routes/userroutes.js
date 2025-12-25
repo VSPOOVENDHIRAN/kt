@@ -25,6 +25,7 @@ router.post("/register", authController.registerUser);
 router.post("/login", authController.login);
 
 
+
 // ------------------ PROTECTED ROUTES ------------------ //
 
 // Example: Get logged-in user profile
