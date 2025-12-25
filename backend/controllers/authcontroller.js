@@ -2,7 +2,7 @@ const User = require("../models/user");
 const Device = require("../models/device"); // assuming you have device collection
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { sendOTP } = require("../utils/sendotp");
+//const { sendOTP } = require("../utils/sendotp");
 
 const OTP_STORE = {}; // temporary in-memory OTP store { phone: { otp, expires } }
 
@@ -21,6 +21,7 @@ const authController = {
 
         }
         console.log("Device found for phone:", phone);
+        sendOtp (phone);
 
       res.json({ success: true, meter_id: device.meter_id, gridid: device.grid_id });
     } catch (err) {
@@ -30,22 +31,7 @@ const authController = {
   },
 
   // Step 2: Send OTP
-  async sendOtp(req, res) {
-    try {
-      const { phone } = req.body;
-      if (!phone) return res.status(400).json({ success: false, message: "Phone required" });
-
-      const otp = Math.floor(1000 + Math.random() * 9000); // 4-digit OTP
-      const expires = Date.now() + 5 * 60 * 1000; // 5 min expiry
-      OTP_STORE[phone] = { otp, expires };
-
-      await sendOTP(phone, otp); // implement SMS in utils/sendotp.js
-      res.json({ success: true, message: "OTP sent" });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ success: false, message: "Server error" });
-    }
-  },
+  
 
   // Step 3: Verify OTPkdjfkdmdkscmcmsdsdcsdc
   async verifyOtp(req, res) {
@@ -74,6 +60,7 @@ const authController = {
 
       // 1 Check if device exists
       const device = await Device.findOne({ phone });
+
       if (!device) {
         return res.status(400).json({ error: "Device not registered" });
       }
@@ -90,17 +77,33 @@ const authController = {
       }
       console.log("Email not registered:", email);
 
+      const phoneExists = await User.findOne({ phone });
+      if (phoneExists) {
+        return res.status(400).json({ error: "Phone is already registered" });
+      }
+        console.log("Phone not registered:", phone);
+
       // 3️ Check if meter_id already assigned
       const meterAssigned = await User.findOne({ meter_id: device.meter_id });
+
       if (meterAssigned) {
         return res.status(400).json({ error: "Device already linked to another user" });
       }
        console.log("Meter ID not linked, proceeding with registration:", device.meter_id);
+const lastUser = await User.findOne({ user_id: /^USR\d+$/ })
+  .sort({ created_at: -1 });
 
-      // 3️ Generate user_id
-      const lastUser = await User.findOne().sort({ created_at: -1 });
-      const lastNumber = lastUser ? parseInt(lastUser.user_id.replace("USR", "")) : 1000;
-      const user_id = "USR" + (lastNumber + 1);
+let lastNumber = 1000;
+
+if (lastUser && lastUser.user_id) {
+  const match = lastUser.user_id.match(/^USR(\d+)$/);
+  if (match) {
+    lastNumber = Number(match[1]);
+  }
+}
+
+const user_id = `USR${lastNumber + 1}`;
+
 
       // 4️ Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -115,11 +118,9 @@ const authController = {
         meter_id: device.meter_id,
         transformer_id: device.transformer_id ,
         grid_id: device.grid_id,
-        wallet_balance: 0,
+       // wallet_address: "", // to be set later
         energy_balance:0, 
-        token_balance: 0,
         reserved_energy:0, // locked for sell offers
-        reserved_tokens: 0,  
         total_energy_sold:0,            // P2P sold (kWh)
         total_energy_bought:0 ,          // P2P bought (kWh)
         total_imported_energy:0 ,          // From meter
@@ -177,5 +178,25 @@ const authController = {
     }
   }
 };
+
+const sendOtp = async(phone) => {
+    try {
+    //  const { phone } = req.body;
+      if (!phone) return res.status(400).json({ success: false, message: "Phone required" });
+
+      const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
+      const expires = Date.now() + 5 * 60 * 1000; // 5 min expiry
+      OTP_STORE[phone] = { otp, expires };
+
+     // await sendOTP(phone, otp); // implement SMS in utils/sendotp.js
+
+      
+         console.log(`Sending OTP ${otp} to phone ${phone}`);
+
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  }
 
 module.exports = authController;
