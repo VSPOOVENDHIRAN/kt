@@ -163,11 +163,12 @@ const authController = {
 
       const match = await bcrypt.compare(password, user.password);
       if (!match) return res.status(400).json({ success: false, message: "Invalid password" });
-
+      
+      
       user.last_login = new Date();
       await user.save();
 
-      const token = jwt.sign({ user_id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+      const token = jwt.sign({ user_id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
       console.log("Login successful for user:", token);
       res.json({ success: true, user, token });
     } catch (err) {
