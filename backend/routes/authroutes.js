@@ -10,7 +10,7 @@ console.log("userController.getUserProfile:", typeof userController.getUserProfi
 
 // --------------------- ROUTES ---------------------
 router.post("/check-device", authController.checkDevice);
-router.post("/send-otp", authController.sendOtp);
+//router.post("/send-otp", authController.sendOtp);
 router.get("/profile", authMiddleware, userController.getUserProfile);
 router.post("/change-password", authMiddleware, userController.changePassword);
 
