@@ -8,15 +8,31 @@ import {
     ArrowTrendingUpIcon,
     ArrowTrendingDownIcon,
 } from "@heroicons/react/24/outline";
-import NavigationBar from "../components/navbar.jsx";
+
 import LineChart from "../components/LineChart.jsx";
+import { init3DCardTilt } from "../card-3d-tilt.js";
+
 
 export default function Dashboard() {
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showBookIntro, setShowBookIntro] = useState(false);
     const navigate = useNavigate();
 
     const token = localStorage.getItem("token");
+
+    // Check if book intro should play (only once ever)
+    useEffect(() => {
+        const hasSeenBookIntro = localStorage.getItem("dashboard_book_intro_seen");
+        if (!hasSeenBookIntro) {
+            setShowBookIntro(true);
+            localStorage.setItem("dashboard_book_intro_seen", "true");
+            // Auto-hide after animation completes (7 seconds total)
+            setTimeout(() => {
+                setShowBookIntro(false);
+            }, 7000);
+        }
+    }, []);
 
     // Fetch user data
     useEffect(() => {
@@ -49,6 +65,17 @@ export default function Dashboard() {
 
         fetchData();
     }, [token, navigate]);
+
+    // Initialize 3D card tilt after dashboard loads
+    useEffect(() => {
+        if (userData) {
+            // Small delay to ensure cards are rendered
+            const timer = setTimeout(() => {
+                init3DCardTilt();
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [userData]);
 
     // Generate realistic chart data with logical trends
     const generateChartData = (type, days = 30) => {
@@ -134,218 +161,274 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="min-h-screen p-6 pb-24 max-w-7xl mx-auto">
-            {/* Welcome Message - ONLY IN DASHBOARD */}
-            <div className="mb-6 animate-fade-in-up">
-                <h2 className="text-xl font-semibold text-gray-300">
-                    Welcome, <span className="text-solar">{userData.name || "User"}</span>
-                </h2>
-                <p className="text-gray-500 text-sm mt-1">
-                    Here's your energy trading overview
-                </p>
-            </div>
+        <>
+            {/* ONE-TIME 3D BOOK INTRO ANIMATION */}
+            {showBookIntro && (
+                <div className="dashboard-3d-intro-overlay">
+                    {/* The Compressed Book */}
+                    <div className="intro-compressed-book"></div>
 
-            {/* Header */}
-            <div className="mb-8 animate-fade-in-up delay-100">
-                <h1 className="text-3xl font-bold mb-2">
-                    <span className="text-solar">Dash</span>
-                    <span className="text-energy">board</span>
-                </h1>
-            </div>
+                    {/* Dashboard Sections - Start compressed, then scatter */}
+                    <div className="intro-dashboard-section intro-section-1">
+                        <div className="intro-section-icon" style={{ background: '#10b981' }}>
+                            <WalletIcon className="w-8 h-8 text-white" />
+                        </div>
+                        <div className="intro-section-label">Welcome</div>
+                    </div>
 
-            {/* User Info Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                {/* Wallet Address */}
-                <div className="energy-card energy-card-blockchain animate-fade-in-up delay-100">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                            <WalletIcon className="w-5 h-5 text-white" />
+                    <div className="intro-dashboard-section intro-section-2">
+                        <div className="intro-section-icon" style={{ background: '#3b82f6' }}>
+                            <UserIcon className="w-8 h-8 text-white" />
                         </div>
-                        <div>
-                            <p className="data-label text-xs">Wallet Address</p>
-                            <p className="text-sm font-mono text-blue-400">
-                                {shortenAddress(userData.user_id)}
-                            </p>
+                        <div className="intro-section-label">User Info</div>
+                    </div>
+
+                    <div className="intro-dashboard-section intro-section-3">
+                        <div className="intro-section-icon" style={{ background: '#fbbf24' }}>
+                            <CubeIcon className="w-8 h-8 text-white" />
                         </div>
+                        <div className="intro-section-label">Statistics</div>
+                    </div>
+
+                    <div className="intro-dashboard-section intro-section-4">
+                        <div className="intro-section-icon" style={{ background: '#22c55e' }}>
+                            <ArrowTrendingUpIcon className="w-8 h-8 text-white" />
+                        </div>
+                        <div className="intro-section-label">Charts</div>
+                    </div>
+
+                    <div className="intro-dashboard-section intro-section-5">
+                        <div className="intro-section-icon" style={{ background: '#f59e0b' }}>
+                            <BoltIcon className="w-8 h-8 text-white" />
+                        </div>
+                        <div className="intro-section-label">Activity</div>
+                    </div>
+
+                    <div className="intro-dashboard-section intro-section-6">
+                        <div className="intro-section-icon" style={{ background: '#6366f1' }}>
+                            <ArrowTrendingDownIcon className="w-8 h-8 text-white" />
+                        </div>
+                        <div className="intro-section-label">Navigation</div>
                     </div>
                 </div>
+            )}
 
-                {/* Role */}
-                <div className="energy-card energy-card-solar animate-fade-in-up delay-200">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
-                            <UserIcon className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                            <p className="data-label text-xs">Role</p>
-                            <p className="text-sm font-semibold text-solar">
-                                Seller / Buyer
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Token Balance */}
-                <div className="energy-card animate-fade-in-up delay-300">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center">
-                            <CubeIcon className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                            <p className="data-label text-xs">Token Balance</p>
-                            <p className="data-value text-lg data-value-energy">
-                                {userData.token_balance}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Energy Balance */}
-                <div className="energy-card animate-fade-in-up delay-400 animate-pulse-subtle">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
-                            <BoltIcon className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                            <p className="data-label text-xs">Energy Balance</p>
-                            <p className="data-value text-lg data-value-solar">
-                                {userData.energy_balance} kWh
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Stats Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                {/* Total Sold */}
-                <div className="energy-card energy-card-solar animate-fade-in-up delay-500">
-                    <div className="flex items-center justify-between mb-4">
-                        <div>
-                            <p className="data-label">Total Energy Sold (30d)</p>
-                            <p className="data-value data-value-solar">{totalSold.toFixed(1)} kWh</p>
-                        </div>
-                        <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                            <ArrowTrendingUpIcon className="w-6 h-6 text-green-500" />
-                        </div>
-                    </div>
-                    <p className="text-sm text-gray-400">
-                        Avg: {(totalSold / 30).toFixed(1)} kWh/day
+            {/* MAIN DASHBOARD CONTENT */}
+            <div className={`min-h-screen p-6 pb-24 max-w-7xl mx-auto ${showBookIntro ? 'dashboard-3d-expand-settle' : 'dashboard-entrance'}`}>
+                {/* Welcome Message - ONLY IN DASHBOARD */}
+                <div className="mb-6 card-stagger card-stagger-1">
+                    <h2 className="text-xl font-semibold text-gray-300">
+                        Welcome, <span className="text-solar">{userData.name || "User"}</span>
+                    </h2>
+                    <p className="text-gray-500 text-sm mt-1">
+                        Here's your energy trading overview
                     </p>
                 </div>
 
-                {/* Total Bought */}
-                <div className="energy-card energy-card-blockchain animate-fade-in-up delay-600">
-                    <div className="flex items-center justify-between mb-4">
-                        <div>
-                            <p className="data-label">Total Energy Bought (30d)</p>
-                            <p className="data-value text-blue-400">{totalBought.toFixed(1)} kWh</p>
-                        </div>
-                        <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                            <ArrowTrendingDownIcon className="w-6 h-6 text-blue-500" />
-                        </div>
-                    </div>
-                    <p className="text-sm text-gray-400">
-                        Avg: {(totalBought / 30).toFixed(1)} kWh/day
-                    </p>
+                {/* Header */}
+                <div className="mb-8 card-stagger card-stagger-2">
+                    <h1 className="text-3xl font-bold mb-2">
+                        <span className="text-solar">Dash</span>
+                        <span className="text-energy">board</span>
+                    </h1>
                 </div>
 
-                {/* Net Balance */}
-                <div className="energy-card animate-fade-in-up delay-700">
-                    <div className="flex items-center justify-between mb-4">
-                        <div>
-                            <p className="data-label">Net Energy (30d)</p>
-                            <p className={`data-value ${totalSold > totalBought ? 'text-energy' : 'text-blue-400'}`}>
-                                {(totalSold - totalBought).toFixed(1)} kWh
-                            </p>
-                        </div>
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${totalSold > totalBought ? 'bg-green-500/20' : 'bg-blue-500/20'
-                            }`}>
-                            <BoltIcon className={`w-6 h-6 ${totalSold > totalBought ? 'text-green-500' : 'text-blue-500'}`} />
-                        </div>
-                    </div>
-                    <p className="text-sm text-gray-400">
-                        {totalSold > totalBought ? 'Net Seller' : 'Net Buyer'}
-                    </p>
-                </div>
-            </div>
 
-            {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                {/* Energy Sold Chart */}
-                <div className="energy-card energy-card-solar animate-fade-in-up delay-800">
-                    <h3 className="chart-title flex items-center gap-2">
-                        <ArrowTrendingUpIcon className="w-5 h-5 text-solar" />
-                        Energy Sold (Last 30 Days)
-                    </h3>
-                    <div className="chart-container">
-                        <LineChart
-                            data={energySoldData}
-                            color="#10b981"
-                            label="kWh Sold"
-                            height={250}
-                        />
-                    </div>
-                </div>
-
-                {/* Energy Bought Chart */}
-                <div className="energy-card energy-card-blockchain animate-fade-in-up delay-900">
-                    <h3 className="chart-title flex items-center gap-2">
-                        <ArrowTrendingDownIcon className="w-5 h-5 text-blue-400" />
-                        Energy Bought (Last 30 Days)
-                    </h3>
-                    <div className="chart-container">
-                        <LineChart
-                            data={energyBoughtData}
-                            color="#3b82f6"
-                            label="kWh Bought"
-                            height={250}
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* Recent Activity */}
-            <div className="energy-card animate-fade-in-up delay-1000">
-                <h3 className="text-xl font-bold mb-4">Recent Activity</h3>
-                <div className="space-y-3">
-                    {[
-                        { type: 'sell', amount: '45 kWh', tokens: '135', time: '2 hours ago', status: 'completed' },
-                        { type: 'buy', amount: '30 kWh', tokens: '90', time: '5 hours ago', status: 'completed' },
-                        { type: 'sell', amount: '60 kWh', tokens: '180', time: '1 day ago', status: 'completed' },
-                    ].map((activity, i) => (
-                        <div
-                            key={i}
-                            className="flex items-center justify-between p-4 bg-energy-subtle rounded-lg border border-energy"
-                        >
-                            <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${activity.type === 'sell' ? 'bg-green-500/20' : 'bg-blue-500/20'
-                                    }`}>
-                                    {activity.type === 'sell' ? (
-                                        <ArrowTrendingUpIcon className="w-5 h-5 text-green-500" />
-                                    ) : (
-                                        <ArrowTrendingDownIcon className="w-5 h-5 text-blue-500" />
-                                    )}
-                                </div>
-                                <div>
-                                    <p className="font-semibold">
-                                        {activity.type === 'sell' ? 'Sold' : 'Bought'} {activity.amount}
-                                    </p>
-                                    <p className="text-sm text-gray-400">{activity.time}</p>
-                                </div>
+                {/* User Info Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    {/* Wallet Address */}
+                    <div className="energy-card energy-card-blockchain card-stagger card-stagger-3">
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                                <WalletIcon className="w-5 h-5 text-white" />
                             </div>
-                            <div className="text-right">
-                                <p className="font-semibold text-solar">{activity.tokens} Tokens</p>
-                                <span className="status-badge status-completed text-xs">
-                                    {activity.status}
-                                </span>
+                            <div>
+                                <p className="data-label text-xs">Wallet Address</p>
+                                <p className="text-sm font-mono text-blue-400">
+                                    {shortenAddress(userData.user_id)}
+                                </p>
                             </div>
                         </div>
-                    ))}
-                </div>
-            </div>
+                    </div>
 
-            <NavigationBar active="Dashboard" />
-        </div>
+                    {/* Role */}
+                    <div className="energy-card energy-card-solar card-stagger card-stagger-4">
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
+                                <UserIcon className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                                <p className="data-label text-xs">Role</p>
+                                <p className="text-sm font-semibold text-solar">
+                                    Seller / Buyer
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Token Balance */}
+                    <div className="energy-card card-stagger card-stagger-5">
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center">
+                                <CubeIcon className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                                <p className="data-label text-xs">Token Balance</p>
+                                <p className="data-value text-lg data-value-energy counter-animate">
+                                    {userData.token_balance}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Energy Balance */}
+                    <div className="energy-card card-stagger card-stagger-6">
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
+                                <BoltIcon className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                                <p className="data-label text-xs">Energy Balance</p>
+                                <p className="data-value text-lg data-value-solar counter-animate">
+                                    {userData.energy_balance} kWh
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Stats Summary */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    {/* Total Sold */}
+                    <div className="energy-card energy-card-solar card-stagger card-stagger-7">
+                        <div className="flex items-center justify-between mb-4">
+                            <div>
+                                <p className="data-label">Total Energy Sold (30d)</p>
+                                <p className="data-value data-value-solar">{totalSold.toFixed(1)} kWh</p>
+                            </div>
+                            <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
+                                <ArrowTrendingUpIcon className="w-6 h-6 text-green-500" />
+                            </div>
+                        </div>
+                        <p className="text-sm text-gray-400">
+                            Avg: {(totalSold / 30).toFixed(1)} kWh/day
+                        </p>
+                    </div>
+
+                    {/* Total Bought */}
+                    <div className="energy-card energy-card-blockchain card-stagger card-stagger-8">
+                        <div className="flex items-center justify-between mb-4">
+                            <div>
+                                <p className="data-label">Total Energy Bought (30d)</p>
+                                <p className="data-value text-blue-400">{totalBought.toFixed(1)} kWh</p>
+                            </div>
+                            <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                <ArrowTrendingDownIcon className="w-6 h-6 text-blue-500" />
+                            </div>
+                        </div>
+                        <p className="text-sm text-gray-400">
+                            Avg: {(totalBought / 30).toFixed(1)} kWh/day
+                        </p>
+                    </div>
+
+                    {/* Net Balance */}
+                    <div className="energy-card card-stagger card-stagger-9">
+                        <div className="flex items-center justify-between mb-4">
+                            <div>
+                                <p className="data-label">Net Energy (30d)</p>
+                                <p className={`data-value ${totalSold > totalBought ? 'text-energy' : 'text-blue-400'}`}>
+                                    {(totalSold - totalBought).toFixed(1)} kWh
+                                </p>
+                            </div>
+                            <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${totalSold > totalBought ? 'bg-green-500/20' : 'bg-blue-500/20'
+                                }`}>
+                                <BoltIcon className={`w-6 h-6 ${totalSold > totalBought ? 'text-green-500' : 'text-blue-500'}`} />
+                            </div>
+                        </div>
+                        <p className="text-sm text-gray-400">
+                            {totalSold > totalBought ? 'Net Seller' : 'Net Buyer'}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Charts Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    {/* Energy Sold Chart */}
+                    <div className="energy-card energy-card-solar card-stagger card-stagger-10">
+                        <h3 className="chart-title flex items-center gap-2">
+                            <ArrowTrendingUpIcon className="w-5 h-5 text-solar" />
+                            Energy Sold (Last 30 Days)
+                        </h3>
+                        <div className="chart-container">
+                            <LineChart
+                                data={energySoldData}
+                                color="#10b981"
+                                label="kWh Sold"
+                                height={250}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Energy Bought Chart */}
+                    <div className="energy-card energy-card-blockchain card-stagger card-stagger-10">
+                        <h3 className="chart-title flex items-center gap-2">
+                            <ArrowTrendingDownIcon className="w-5 h-5 text-blue-400" />
+                            Energy Bought (Last 30 Days)
+                        </h3>
+                        <div className="chart-container">
+                            <LineChart
+                                data={energyBoughtData}
+                                color="#3b82f6"
+                                label="kWh Bought"
+                                height={250}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Recent Activity */}
+                <div className="energy-card card-stagger card-stagger-10">
+                    <h3 className="text-xl font-bold mb-4">Recent Activity</h3>
+                    <div className="space-y-3">
+                        {[
+                            { type: 'sell', amount: '45 kWh', tokens: '135', time: '2 hours ago', status: 'completed' },
+                            { type: 'buy', amount: '30 kWh', tokens: '90', time: '5 hours ago', status: 'completed' },
+                            { type: 'sell', amount: '60 kWh', tokens: '180', time: '1 day ago', status: 'completed' },
+                        ].map((activity, i) => (
+                            <div
+                                key={i}
+                                className={`activity-item flex items-center justify-between p-4 bg-energy-subtle rounded-lg border border-energy`}
+                                style={{ animationDelay: `${(i + 1) * 50}ms` }}
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center dashboard-icon ${activity.type === 'sell' ? 'bg-green-500/20' : 'bg-blue-500/20'
+                                        }`}>
+                                        {activity.type === 'sell' ? (
+                                            <ArrowTrendingUpIcon className="w-5 h-5 text-green-500" />
+                                        ) : (
+                                            <ArrowTrendingDownIcon className="w-5 h-5 text-blue-500" />
+                                        )}
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold">
+                                            {activity.type === 'sell' ? 'Sold' : 'Bought'} {activity.amount}
+                                        </p>
+                                        <p className="text-sm text-gray-400">{activity.time}</p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-semibold text-solar">{activity.tokens} Tokens</p>
+                                    <span className="status-badge status-completed text-xs">
+                                        {activity.status}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+
+            </div>
+        </>
     );
 }

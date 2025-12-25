@@ -1,5 +1,12 @@
 // ---------------------- Load ENV Variables ----------------------
-require("dotenv").config({ path: "../.env" });
+require("dotenv").config(); // Load .env from current directory
+
+// DEBUG: Check if Twilio credentials are loaded
+console.log("=== ENVIRONMENT VARIABLES DEBUG ===");
+console.log("TWILIO_ACCOUNT_SID:", process.env.TWILIO_ACCOUNT_SID ? "✓ Loaded" : "❌ NOT FOUND");
+console.log("TWILIO_AUTH_TOKEN:", process.env.TWILIO_AUTH_TOKEN ? "✓ Loaded" : "❌ NOT FOUND");
+console.log("TWILIO_VERIFY_SERVICE_SID:", process.env.TWILIO_VERIFY_SERVICE_SID ? "✓ Loaded" : "❌ NOT FOUND");
+console.log("===================================");
 
 // ---------------------- Core Imports ----------------------
 const express = require("express");
@@ -17,7 +24,7 @@ const User = require("./models/user"); // adjust path if needed
 
 // ---------------------- ENV Config ----------------------
 const PORT = process.env.PORT || 4000;
-const MONGO_URI = process.env.MONGO_URI;
+const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
 
 // ---------------------- App Initialization ----------------------
 const app = express();
@@ -81,12 +88,16 @@ const sendNewReading = async (userId, readingData = {}) => {
 };
 
 // ---------------------- Initialize MQTT ----------------------
+// TEMPORARILY DISABLED - Uncomment when MQTT broker is running
+/*
 initMQTT(
     process.env.MQTT_BROKER,
     process.env.MQTT_TOPIC,
     io,
     sendNewReading // pass helper to MQTT service
 );
+*/
+console.log("⚠ MQTT disabled - Enable when broker is available");
 
 // ---------------------- Routes ----------------------
 const authRoutes = require("./routes/authroutes");

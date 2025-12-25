@@ -1,0 +1,430 @@
+/* ===================================
+   TRUE 3D DASHBOARD ANIMATIONS
+   Perspective, RotateX/Y, TranslateZ
+   =================================== */
+
+/* GLOBAL 3D SETUP */
+body {
+    perspective: 1200px;
+    perspective-origin: center center;
+}
+
+/* 1️⃣ DASHBOARD ENTRANCE - 3D Depth Settle */
+@keyframes dashboard3DSettle {
+    0% {
+        opacity: 0;
+        transform: perspective(1200px) rotateX(8deg) translateZ(-80px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: perspective(1200px) rotateX(0deg) translateZ(0);
+    }
+}
+
+.dashboard-entrance {
+    animation: dashboard3DSettle 500ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    transform-style: preserve-3d;
+}
+
+/* 2️⃣ DASHBOARD CARDS - Staggered 3D Lift */
+@keyframes card3DLift {
+    0% {
+        opacity: 0;
+        transform: perspective(1000px) rotateX(6deg) translateZ(-40px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: perspective(1000px) rotateX(0deg) translateZ(0);
+    }
+}
+
+.card-stagger {
+    animation: card3DLift 450ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    transform-style: preserve-3d;
+    opacity: 0;
+}
+
+/* Stagger delays */
+.card-stagger-1 {
+    animation-delay: 100ms;
+}
+
+.card-stagger-2 {
+    animation-delay: 200ms;
+}
+
+.card-stagger-3 {
+    animation-delay: 300ms;
+}
+
+.card-stagger-4 {
+    animation-delay: 400ms;
+}
+
+.card-stagger-5 {
+    animation-delay: 500ms;
+}
+
+.card-stagger-6 {
+    animation-delay: 600ms;
+}
+
+.card-stagger-7 {
+    animation-delay: 700ms;
+}
+
+.card-stagger-8 {
+    animation-delay: 800ms;
+}
+
+.card-stagger-9 {
+    animation-delay: 900ms;
+}
+
+.card-stagger-10 {
+    animation-delay: 1000ms;
+}
+
+/* 3️⃣ CARD INTERACTION - Mouse-Driven 3D Tilt */
+.energy-card {
+    transform-style: preserve-3d;
+    transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1),
+        box-shadow 200ms cubic-bezier(0.23, 1, 0.32, 1);
+    position: relative;
+}
+
+.energy-card:hover {
+    transform: perspective(1000px) translateZ(15px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Mouse-driven tilt will be handled by JS */
+.energy-card.tilt-active {
+    transition: none;
+    /* Instant response during mouse move */
+}
+
+/* 4️⃣ ICONS - Parallax Depth Layer */
+.dashboard-icon,
+.energy-card svg,
+.energy-card .w-10,
+.energy-card .w-12 {
+    transform-style: preserve-3d;
+    transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.energy-card:hover .dashboard-icon,
+.energy-card:hover svg,
+.energy-card:hover .w-10,
+.energy-card:hover .w-12 {
+    transform: translateZ(25px);
+}
+
+/* 5️⃣ NUMBERS / VALUES - 3D Settle */
+@keyframes number3DSettle {
+    0% {
+        opacity: 0;
+        transform: perspective(800px) translateZ(-20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: perspective(800px) translateZ(0);
+    }
+}
+
+.counter-animate,
+.data-value {
+    animation: number3DSettle 400ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    transform-style: preserve-3d;
+}
+
+/* 6️⃣ BOTTOM NAVIGATION - 3D Active Focus */
+.tab-button {
+    transform-style: preserve-3d;
+    transition: transform 300ms cubic-bezier(0.23, 1, 0.32, 1),
+        color 250ms ease;
+}
+
+.tab-button.active {
+    transform: perspective(800px) translateZ(15px) scale(1.05);
+    color: #10b981;
+}
+
+.tab-button:not(.active) {
+    transform: perspective(800px) translateZ(0) scale(1);
+    color: #94a3b8;
+}
+
+/* Tab icon 3D depth */
+.tab-button svg {
+    transform-style: preserve-3d;
+    transition: transform 300ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.tab-button.active svg {
+    transform: translateZ(5px);
+}
+
+/* ===================================
+   ACTIVITY ITEMS - 3D Fade In
+   =================================== */
+
+@keyframes activity3DFade {
+    0% {
+        opacity: 0;
+        transform: perspective(800px) rotateX(4deg) translateZ(-15px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: perspective(800px) rotateX(0deg) translateZ(0);
+    }
+}
+
+.activity-item {
+    animation: activity3DFade 350ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    transform-style: preserve-3d;
+}
+
+.activity-item:nth-child(1) {
+    animation-delay: 50ms;
+}
+
+.activity-item:nth-child(2) {
+    animation-delay: 100ms;
+}
+
+.activity-item:nth-child(3) {
+    animation-delay: 150ms;
+}
+
+.activity-item:nth-child(4) {
+    animation-delay: 200ms;
+}
+
+.activity-item:nth-child(5) {
+    animation-delay: 250ms;
+}
+
+/* ===================================
+   BUTTON 3D INTERACTIONS
+   =================================== */
+
+.btn-energy,
+.btn-solar {
+    transform-style: preserve-3d;
+    transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1),
+        box-shadow 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.btn-energy:hover:not(:disabled),
+.btn-solar:hover:not(:disabled) {
+    transform: perspective(800px) translateZ(8px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.btn-energy:active:not(:disabled),
+.btn-solar:active:not(:disabled) {
+    transform: perspective(800px) translateZ(2px) scale(0.98);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ===================================
+   CHART CONTAINERS - 3D Depth
+   =================================== */
+
+@keyframes chart3DFade {
+    0% {
+        opacity: 0;
+        transform: perspective(1000px) rotateX(5deg) translateZ(-30px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: perspective(1000px) rotateX(0deg) translateZ(0);
+    }
+}
+
+.chart-container {
+    animation: chart3DFade 450ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    transform-style: preserve-3d;
+}
+
+/* ===================================
+   BOOK INTRO - Enhanced 3D
+   =================================== */
+
+.dashboard-book-intro {
+    perspective: 1500px;
+    transform-style: preserve-3d;
+}
+
+.intro-book {
+    transform-style: preserve-3d;
+    animation: book3DRotation 1.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+        book3DFadeOut 1s 4s ease-out forwards;
+}
+
+@keyframes book3DRotation {
+    0% {
+        transform: perspective(1500px) rotateY(0deg) rotateX(0deg) translateZ(-100px) scale(0.7);
+        opacity: 0;
+    }
+
+    25% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: perspective(1500px) rotateY(25deg) rotateX(-15deg) translateZ(0) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes book3DFadeOut {
+    0% {
+        opacity: 1;
+        transform: perspective(1500px) rotateY(25deg) rotateX(-15deg) translateZ(0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: perspective(1500px) rotateY(25deg) rotateX(-15deg) translateZ(-50px) scale(0.85);
+    }
+}
+
+/* Dashboard pages - 3D scatter */
+.dashboard-page {
+    transform-style: preserve-3d;
+}
+
+@keyframes page3DReleaseScatter {
+    0% {
+        opacity: 0;
+        transform: perspective(1200px) translate(-50%, -50%) rotateX(0deg) rotateY(0deg) translateZ(-50px) scale(0.2);
+    }
+
+    15% {
+        opacity: 1;
+        transform: perspective(1200px) translate(-50%, -50%) rotateX(5deg) rotateY(0deg) translateZ(-20px) scale(0.6);
+    }
+
+    30% {
+        opacity: 1;
+        transform: perspective(1200px) translate(-50%, -50%) rotateX(0deg) rotateY(0deg) translateZ(0) scale(0.8);
+    }
+
+    70% {
+        opacity: 1;
+        transform: perspective(1200px) translate(calc(-50% + var(--scatter-x)), calc(-50% + var(--scatter-y))) rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg)) translateZ(var(--scatter-z, 20px)) scale(0.9) rotate(var(--scatter-rotate));
+    }
+
+    100% {
+        opacity: 0;
+        transform: perspective(1200px) translate(calc(-50% + var(--scatter-x)), calc(-50% + var(--scatter-y))) rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg)) translateZ(var(--scatter-z, 30px)) scale(0.95) rotate(var(--scatter-rotate));
+    }
+}
+
+.dashboard-page-1 {
+    animation: page3DReleaseScatter 3s 1.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    --scatter-x: -30vw;
+    --scatter-y: -25vh;
+    --scatter-z: 40px;
+    --rotate-x: -10deg;
+    --rotate-y: -15deg;
+    --scatter-rotate: -18deg;
+}
+
+.dashboard-page-2 {
+    animation: page3DReleaseScatter 3s 1.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    --scatter-x: 30vw;
+    --scatter-y: -25vh;
+    --scatter-z: 35px;
+    --rotate-x: -10deg;
+    --rotate-y: 15deg;
+    --scatter-rotate: 18deg;
+}
+
+.dashboard-page-3 {
+    animation: page3DReleaseScatter 3s 2.0s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    --scatter-x: -35vw;
+    --scatter-y: 5vh;
+    --scatter-z: 30px;
+    --rotate-x: 5deg;
+    --rotate-y: -20deg;
+    --scatter-rotate: -22deg;
+}
+
+.dashboard-page-4 {
+    animation: page3DReleaseScatter 3s 2.1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    --scatter-x: 35vw;
+    --scatter-y: 5vh;
+    --scatter-z: 25px;
+    --rotate-x: 5deg;
+    --rotate-y: 20deg;
+    --scatter-rotate: 22deg;
+}
+
+.dashboard-page-5 {
+    animation: page3DReleaseScatter 3s 2.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    --scatter-x: -25vw;
+    --scatter-y: 28vh;
+    --scatter-z: 20px;
+    --rotate-x: 10deg;
+    --rotate-y: -12deg;
+    --scatter-rotate: -15deg;
+}
+
+.dashboard-page-6 {
+    animation: page3DReleaseScatter 3s 2.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    --scatter-x: 25vw;
+    --scatter-y: 28vh;
+    --scatter-z: 15px;
+    --rotate-x: 10deg;
+    --rotate-y: 12deg;
+    --scatter-rotate: 15deg;
+}
+
+/* Dashboard settle - 3D */
+.dashboard-settle {
+    animation: dashboard3DSettle 1.2s 4.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    opacity: 0;
+    transform-style: preserve-3d;
+}
+
+/* Overlay fade */
+.dashboard-book-intro {
+    animation: overlayFadeOut 0.6s 5.2s ease-out forwards;
+}
+
+@keyframes overlayFadeOut {
+    0% {
+        opacity: 1;
+        pointer-events: none;
+    }
+
+    100% {
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+    }
+}
+
+/* ===================================
+   UTILITY CLASSES
+   =================================== */
+
+.preserve-3d {
+    transform-style: preserve-3d;
+}
+
+.perspective-1000 {
+    perspective: 1000px;
+}
+
+.perspective-1200 {
+    perspective: 1200px;
+}

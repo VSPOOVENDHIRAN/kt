@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import NavigationBar from "../components/navbar.jsx";
+
 import { BoltIcon, ClockIcon } from "@heroicons/react/24/outline";
 
 export default function History() {
@@ -140,7 +140,6 @@ export default function History() {
           ))}
       </div>
 
-      <NavigationBar active="History" />
     </div>
   );
 }

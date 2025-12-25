@@ -1,0 +1,112 @@
+/* ===================================
+   CHART PROGRESSIVE DRAW ANIMATION
+   =================================== */
+
+/* Chart line progressive draw */
+@keyframes chartLineDraw {
+    0% {
+        stroke-dashoffset: 1000;
+    }
+
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+.chart-line-animate {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: chartLineDraw 1200ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+/* Chart point fade in */
+@keyframes chartPointFade {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.chart-point-animate {
+    animation: chartPointFade 300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ===================================
+   BOTTOM NAVIGATION TAB ANIMATIONS
+   =================================== */
+
+/* Active tab icon scale */
+.tab-button {
+    position: relative;
+    transition: all 250ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.tab-button svg,
+.tab-button .tab-icon {
+    transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1),
+        color 250ms ease;
+}
+
+.tab-button.active svg,
+.tab-button.active .tab-icon {
+    transform: scale(1.08);
+}
+
+/* Active tab color highlight */
+.tab-button {
+    color: #94a3b8;
+    transition: color 250ms ease;
+}
+
+.tab-button.active {
+    color: #10b981;
+}
+
+/* Tab indicator morph/slide */
+.tab-indicator {
+    position: absolute;
+    bottom: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #10b981, #fbbf24);
+    border-radius: 2px 2px 0 0;
+    transition: all 350ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* ===================================
+   NUMBER COUNTING ANIMATION
+   =================================== */
+
+/* Number count-up animation */
+@keyframes numberCountUp {
+    0% {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.number-count-up {
+    animation: numberCountUp 500ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Stagger for multiple numbers */
+.number-count-up:nth-child(1) {
+    animation-delay: 0ms;
+}
+
+.number-count-up:nth-child(2) {
+    animation-delay: 100ms;
+}
+
+.number-count-up:nth-child(3) {
+    animation-delay: 200ms;
+}

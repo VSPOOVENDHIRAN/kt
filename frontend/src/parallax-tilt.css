@@ -1,0 +1,117 @@
+/* ===================================
+   METAMASK-STYLE PARALLAX TILT
+   Mouse-Driven 3D Hover Effect
+   =================================== */
+
+/* Parallax Tilt Container */
+.parallax-tilt-container {
+    transform-style: preserve-3d;
+    will-change: transform;
+    position: relative;
+}
+
+/* Layered depth for inner elements */
+.parallax-layer-1 {
+    transform: translateZ(20px);
+    transform-style: preserve-3d;
+}
+
+.parallax-layer-2 {
+    transform: translateZ(40px);
+    transform-style: preserve-3d;
+}
+
+.parallax-layer-3 {
+    transform: translateZ(60px);
+    transform-style: preserve-3d;
+}
+
+/* Subtle glow effect on hover */
+.parallax-tilt-container:hover {
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        0 0 40px rgba(16, 185, 129, 0.1);
+}
+
+/* Smooth transitions for all child elements */
+.parallax-tilt-container * {
+    transition: transform 400ms cubic-bezier(0.03, 0.98, 0.52, 0.99);
+}
+
+/* Hero card specific styling */
+.dashboard-hero-card {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border: 1px solid var(--border-accent);
+    border-radius: 16px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle background gradient that moves with tilt */
+.dashboard-hero-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center,
+            rgba(16, 185, 129, 0.1) 0%,
+            transparent 50%);
+    opacity: 0;
+    transition: opacity 400ms ease;
+    pointer-events: none;
+}
+
+.parallax-tilt-container:hover .dashboard-hero-card::before {
+    opacity: 1;
+}
+
+/* Icon container with depth */
+.hero-icon-container {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #10b981 0%, #065f46 100%);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+    transform-style: preserve-3d;
+}
+
+/* Text elements with subtle depth */
+.hero-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fbbf24 0%, #10b981 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transform-style: preserve-3d;
+}
+
+.hero-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    transform-style: preserve-3d;
+}
+
+/* Stats with layered depth */
+.hero-stat {
+    transform-style: preserve-3d;
+}
+
+.hero-stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-energy-green);
+    transform-style: preserve-3d;
+}
+
+.hero-stat-label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    transform-style: preserve-3d;
+}

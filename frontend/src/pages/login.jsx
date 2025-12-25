@@ -28,6 +28,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [celebrating, setCelebrating] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async () => {
@@ -49,7 +50,14 @@ export default function Login() {
     if (data.token) {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user_id", data.user.user_id);
-      navigate("/dashboard");
+
+      // Trigger celebration animation
+      setCelebrating(true);
+
+      // Navigate after celebration completes
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1000);
     } else if (data.networkError) {
       setError(data.message);
     } else {
@@ -57,9 +65,10 @@ export default function Login() {
     }
   };
 
+
   return (
-    <div className="flex items-center justify-center min-h-screen p-4">
-      <div className="w-full max-w-md animate-fade-in-up">
+    <div className="flex items-center justify-center min-h-screen p-4 pb-32">
+      <div className="w-full max-w-md animate-login-entry">
         {/* Logo/Brand Section */}
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold mb-3">
@@ -72,7 +81,7 @@ export default function Login() {
         </div>
 
         {/* Login Card */}
-        <div className="energy-card energy-card-solar space-y-6">
+        <div className={`energy-card energy-card-solar space-y-6 ${celebrating ? 'celebrate-login success-shimmer' : ''}`}>
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
             <p className="text-gray-400">Sign in to your energy trading account</p>

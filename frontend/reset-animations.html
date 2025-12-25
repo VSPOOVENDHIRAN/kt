@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Animations</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #10b981, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #10b981, #fbbf24);
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 1rem;
+            transition: transform 200ms;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+            text-align: left;
+        }
+
+        .info h3 {
+            color: #10b981;
+            margin-top: 0;
+        }
+
+        .info ul {
+            line-height: 1.8;
+        }
+
+        .status {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid #10b981;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎬 Animation Reset Tool</h1>
+        <p style="font-size: 1.1rem; color: #94a3b8; margin-bottom: 2rem;">
+            Click the button below to reset and replay all animations
+        </p>
+
+        <button class="btn" onclick="resetAnimations()">
+            🔄 Reset All Animations
+        </button>
+
+        <div class="info">
+            <h3>📋 What This Does:</h3>
+            <ul>
+                <li>✅ Clears dashboard book intro flag</li>
+                <li>✅ Clears trade card deck flag</li>
+                <li>✅ Reloads your frontend</li>
+                <li>✅ Animations will play again!</li>
+            </ul>
+        </div>
+
+        <div id="status" style="display: none;" class="status"></div>
+
+        <div style="margin-top: 2rem; font-size: 0.875rem; color: #64748b;">
+            <p><strong>Dashboard Animation:</strong> 3D book → sections scatter → settle</p>
+            <p><strong>Trade Animation:</strong> 9 cards stacked → explode → grid</p>
+        </div>
+    </div>
+
+    <script>
+        function resetAnimations() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '🔄 Resetting animations...';
+
+            // Clear localStorage flags
+            localStorage.removeItem('dashboard_book_intro_seen');
+            localStorage.removeItem('trade_card_deck_seen');
+
+            statusDiv.innerHTML = '✅ Flags cleared! Redirecting to dashboard...';
+
+            // Redirect to dashboard after 1 second
+            setTimeout(() => {
+                window.location.href = 'http://localhost:3000/dashboard';
+            }, 1000);
+        }
+
+        // Check current status
+        window.onload = () => {
+            const dashboardSeen = localStorage.getItem('dashboard_book_intro_seen');
+            const tradeSeen = localStorage.getItem('trade_card_deck_seen');
+
+            console.log('Dashboard intro seen:', dashboardSeen);
+            console.log('Trade deck seen:', tradeSeen);
+        };
+    </script>
+</body>
+
+</html>

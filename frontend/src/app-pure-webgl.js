@@ -9,10 +9,25 @@ import TradePage from "./pages/trade";
 // Professional Solar Energy WebGL background
 import SolarEnergyBackground from "./components/SolarEnergyBackground";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PageTransition from "./components/PageTransition";
+import NavigationBar from "./components/navbar";
+import { useLocation } from "react-router-dom";
 
-function App() {
+function AppContent() {
+    const location = useLocation();
+
+    // Determine active tab based on current route
+    const getActiveTab = () => {
+        const path = location.pathname;
+        if (path === '/dashboard') return 'Dashboard';
+        if (path === '/trade') return 'Trade';
+        if (path === '/history') return 'History';
+        if (path === '/profile') return 'Profile';
+        return null;
+    };
+
     return (
-        <BrowserRouter>
+        <>
             <SolarEnergyBackground />
             <Routes>
                 {/* Public Routes */}
@@ -25,7 +40,9 @@ function App() {
                     path="/dashboard"
                     element={
                         <ProtectedRoute>
-                            <Dashboard />
+                            <PageTransition>
+                                <Dashboard />
+                            </PageTransition>
                         </ProtectedRoute>
                     }
                 />
@@ -33,7 +50,9 @@ function App() {
                     path="/profile"
                     element={
                         <ProtectedRoute>
-                            <Profile />
+                            <PageTransition>
+                                <Profile />
+                            </PageTransition>
                         </ProtectedRoute>
                     }
                 />
@@ -41,7 +60,9 @@ function App() {
                     path="/history"
                     element={
                         <ProtectedRoute>
-                            <History />
+                            <PageTransition>
+                                <History />
+                            </PageTransition>
                         </ProtectedRoute>
                     }
                 />
@@ -49,13 +70,26 @@ function App() {
                     path="/trade"
                     element={
                         <ProtectedRoute>
-                            <TradePage />
+                            <PageTransition>
+                                <TradePage />
+                            </PageTransition>
                         </ProtectedRoute>
                     }
                 />
             </Routes>
+            {/* Bottom Navigation - Always visible at app level */}
+            <NavigationBar active={getActiveTab()} />
+        </>
+    );
+}
+
+function App() {
+    return (
+        <BrowserRouter>
+            <AppContent />
         </BrowserRouter>
     );
 }
 
 export default App;
+

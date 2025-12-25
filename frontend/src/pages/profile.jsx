@@ -12,7 +12,7 @@ import {
   EyeSlashIcon,
   ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
-import NavigationBar from "../components/navbar.jsx";
+
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -378,7 +378,6 @@ export default function Profile() {
         )}
       </div>
 
-      <NavigationBar active="Profile" />
     </div>
   );
 }

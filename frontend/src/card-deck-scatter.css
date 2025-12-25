@@ -1,0 +1,317 @@
+/* ===================================
+   3D CARD DECK SCATTER ANIMATION
+   GPU-Accelerated CSS 3D Transform
+   =================================== */
+
+/* Scene container with perspective */
+.card-deck-scene {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    perspective: 1200px;
+    perspective-origin: center center;
+    overflow: hidden;
+    z-index: 9999;
+}
+
+/* Initial compressed deck at center */
+.card-deck {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform-style: preserve-3d;
+    transform: translate(-50%, -50%);
+}
+
+/* Individual card in deck */
+.deck-card {
+    position: absolute;
+    width: 280px;
+    height: 180px;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border: 2px solid #10b981;
+    border-radius: 16px;
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform-style: preserve-3d;
+    backface-visibility: visible;
+
+    /* Initial stacked state */
+    transform:
+        translate(-50%, -50%) translateZ(var(--initial-z, 0px)) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1);
+
+    /* Compress → Scatter → Grid animation */
+    animation: cardDeckScatter 4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation-delay: var(--card-delay, 0ms);
+}
+
+/* Card content */
+.deck-card-content {
+    padding: 1.5rem;
+    transform-style: preserve-3d;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.deck-card-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    transform: translateZ(10px);
+}
+
+.deck-card-label {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    text-align: center;
+    transform: translateZ(5px);
+}
+
+/* ===================================
+   ANIMATION PHASES
+   =================================== */
+
+@keyframes cardDeckScatter {
+
+    /* PHASE 1: Compress (0-10%) - Store energy */
+    0% {
+        transform:
+            translate(-50%, -50%) translateZ(var(--initial-z, 0px)) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1);
+        opacity: 1;
+    }
+
+    10% {
+        transform:
+            translate(-50%, -50%) translateZ(var(--initial-z, 0px)) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(0.85);
+        opacity: 1;
+    }
+
+    /* PHASE 2: Explosive Scatter (10-50%) */
+    50% {
+        transform:
+            translate(calc(-50% + var(--scatter-x)),
+                calc(-50% + var(--scatter-y))) translateZ(var(--scatter-z)) rotateX(var(--rotate-x)) rotateY(var(--rotate-y)) rotateZ(var(--rotate-z)) scale(0.95);
+        opacity: 1;
+    }
+
+    /* PHASE 3: Grid Settlement (50-100%) */
+    100% {
+        transform:
+            translate(calc(-50% + var(--grid-x)),
+                calc(-50% + var(--grid-y))) translateZ(0px) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(0.9);
+        opacity: 1;
+    }
+}
+
+/* ===================================
+   CARD POSITIONS
+   =================================== */
+
+/* Card 1: Top-Left */
+.deck-card-1 {
+    --initial-z: 0px;
+    --card-delay: 0ms;
+    --scatter-x: -35vw;
+    --scatter-y: -30vh;
+    --scatter-z: 150px;
+    --rotate-x: -25deg;
+    --rotate-y: -30deg;
+    --rotate-z: -15deg;
+    --grid-x: -320px;
+    --grid-y: -200px;
+}
+
+/* Card 2: Top-Center */
+.deck-card-2 {
+    --initial-z: 10px;
+    --card-delay: 50ms;
+    --scatter-x: 0vw;
+    --scatter-y: -35vh;
+    --scatter-z: 180px;
+    --rotate-x: -30deg;
+    --rotate-y: 0deg;
+    --rotate-z: 10deg;
+    --grid-x: 0px;
+    --grid-y: -200px;
+}
+
+/* Card 3: Top-Right */
+.deck-card-3 {
+    --initial-z: 20px;
+    --card-delay: 100ms;
+    --scatter-x: 35vw;
+    --scatter-y: -30vh;
+    --scatter-z: 160px;
+    --rotate-x: -25deg;
+    --rotate-y: 30deg;
+    --rotate-z: 15deg;
+    --grid-x: 320px;
+    --grid-y: -200px;
+}
+
+/* Card 4: Middle-Left */
+.deck-card-4 {
+    --initial-z: 30px;
+    --card-delay: 150ms;
+    --scatter-x: -40vw;
+    --scatter-y: 0vh;
+    --scatter-z: 140px;
+    --rotate-x: 10deg;
+    --rotate-y: -35deg;
+    --rotate-z: -20deg;
+    --grid-x: -320px;
+    --grid-y: 0px;
+}
+
+/* Card 5: Middle-Center */
+.deck-card-5 {
+    --initial-z: 40px;
+    --card-delay: 200ms;
+    --scatter-x: 0vw;
+    --scatter-y: 0vh;
+    --scatter-z: 200px;
+    --rotate-x: 15deg;
+    --rotate-y: 0deg;
+    --rotate-z: 0deg;
+    --grid-x: 0px;
+    --grid-y: 0px;
+}
+
+/* Card 6: Middle-Right */
+.deck-card-6 {
+    --initial-z: 50px;
+    --card-delay: 250ms;
+    --scatter-x: 40vw;
+    --scatter-y: 0vh;
+    --scatter-z: 145px;
+    --rotate-x: 10deg;
+    --rotate-y: 35deg;
+    --rotate-z: 20deg;
+    --grid-x: 320px;
+    --grid-y: 0px;
+}
+
+/* Card 7: Bottom-Left */
+.deck-card-7 {
+    --initial-z: 60px;
+    --card-delay: 300ms;
+    --scatter-x: -35vw;
+    --scatter-y: 30vh;
+    --scatter-z: 130px;
+    --rotate-x: 25deg;
+    --rotate-y: -28deg;
+    --rotate-z: -12deg;
+    --grid-x: -320px;
+    --grid-y: 200px;
+}
+
+/* Card 8: Bottom-Center */
+.deck-card-8 {
+    --initial-z: 70px;
+    --card-delay: 350ms;
+    --scatter-x: 0vw;
+    --scatter-y: 35vh;
+    --scatter-z: 170px;
+    --rotate-x: 30deg;
+    --rotate-y: 0deg;
+    --rotate-z: -8deg;
+    --grid-x: 0px;
+    --grid-y: 200px;
+}
+
+/* Card 9: Bottom-Right */
+.deck-card-9 {
+    --initial-z: 80px;
+    --card-delay: 400ms;
+    --scatter-x: 35vw;
+    --scatter-y: 30vh;
+    --scatter-z: 135px;
+    --rotate-x: 25deg;
+    --rotate-y: 28deg;
+    --rotate-z: 12deg;
+    --grid-x: 320px;
+    --grid-y: 200px;
+}
+
+/* ===================================
+   LIGHTING & SHADOWS
+   =================================== */
+
+.deck-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            transparent 50%,
+            rgba(0, 0, 0, 0.2) 100%);
+    border-radius: 16px;
+    pointer-events: none;
+}
+
+/* Soft glow on cards */
+.deck-card::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, #10b981, #fbbf24);
+    border-radius: 18px;
+    opacity: 0.3;
+    filter: blur(8px);
+    z-index: -1;
+}
+
+/* Scene fade out */
+.card-deck-scene {
+    animation: sceneFadeOut 0.8s 4.5s ease-out forwards;
+}
+
+@keyframes sceneFadeOut {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+/* ===================================
+   PERFORMANCE OPTIMIZATIONS
+   =================================== */
+
+.deck-card {
+    will-change: transform, opacity;
+    -webkit-transform-style: preserve-3d;
+    -webkit-backface-visibility: visible;
+}
+
+.card-deck {
+    will-change: transform;
+}
+
+/* Hardware acceleration hints */
+.card-deck-scene,
+.card-deck,
+.deck-card {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}

@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   HomeIcon,
   ArrowPathIcon,
@@ -9,9 +9,15 @@ import {
 
 export default function NavigationBar({ active }) {
   const token = localStorage.getItem("token");
+  const location = useLocation();
 
   // Don't show navbar if not authenticated
   if (!token) {
+    return null;
+  }
+
+  // Don't show navbar on login or register pages
+  if (location.pathname === "/login" || location.pathname === "/register" || location.pathname === "/") {
     return null;
   }
 
@@ -28,9 +34,9 @@ export default function NavigationBar({ active }) {
         <Link
           key={item.name}
           to={item.route}
-          className={`flex flex-col items-center gap-1 transition duration-300 p-2 rounded-xl cursor-pointer text-xs font-semibold
+          className={`tab-button flex flex-col items-center gap-1 p-2 rounded-xl cursor-pointer text-xs font-semibold
             ${item.name === active
-              ? "text-solar bg-energy-subtle"
+              ? "active text-solar bg-energy-subtle"
               : "text-gray-400 hover:text-energy"
             }
           `}

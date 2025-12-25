@@ -1,0 +1,331 @@
+/* ===================================
+   NEW FEATURES - PARTICLE EFFECTS & TRANSITIONS
+   =================================== */
+
+/* 1️⃣ PARTICLE EXPLOSION ON CLICK */
+@keyframes particleExplode {
+    0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(calc(-50% + var(--particle-x)),
+                calc(-50% + var(--particle-y))) scale(1);
+        opacity: 0;
+    }
+}
+
+.particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--particle-color, #10b981);
+    pointer-events: none;
+    animation: particleExplode 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    box-shadow: 0 0 10px var(--particle-color, #10b981);
+}
+
+/* 2️⃣ CARD CLICK RIPPLE EFFECT */
+@keyframes ripple {
+    0% {
+        transform: scale(0);
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+.energy-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.energy-card::after {
+    content: '';
+    position: absolute;
+    top: var(--ripple-y, 50%);
+    left: var(--ripple-x, 50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.4);
+    transform: translate(-50%, -50%) scale(0);
+    pointer-events: none;
+}
+
+.energy-card.ripple-active::after {
+    animation: ripple 0.6s ease-out;
+}
+
+/* 3️⃣ SMOOTH PAGE TRANSITIONS */
+@keyframes pageSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(30px) scale(0.98);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes pageSlideOut {
+    0% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(-30px) scale(0.98);
+    }
+}
+
+.page-enter {
+    animation: pageSlideIn 400ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.page-exit {
+    animation: pageSlideOut 300ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* 4️⃣ FLOATING PARTICLES BACKGROUND */
+@keyframes floatParticle {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(var(--float-x, 100px),
+                var(--float-y, -100vh)) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+.floating-particle {
+    position: fixed;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10b981, #fbbf24);
+    pointer-events: none;
+    z-index: 1;
+    animation: floatParticle var(--duration, 8s) linear infinite;
+    animation-delay: var(--delay, 0s);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
+
+/* 5️⃣ BUTTON PRESS EFFECT */
+@keyframes buttonPress {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(0.95);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.btn-solar:active,
+.btn-energy:active {
+    animation: buttonPress 200ms ease-out;
+}
+
+/* 6️⃣ SUCCESS NOTIFICATION SLIDE */
+@keyframes notificationSlide {
+    0% {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+
+    10% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    90% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+    z-index: 10000;
+    animation: notificationSlide 3s ease-out forwards;
+}
+
+/* 7️⃣ LOADING SPINNER */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(16, 185, 129, 0.2);
+    border-top-color: #10b981;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* 8️⃣ CARD FLIP ON HOVER */
+.flip-card {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    transform-style: preserve-3d;
+}
+
+.flip-card:hover .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 16px;
+}
+
+.flip-card-back {
+    transform: rotateY(180deg);
+    background: linear-gradient(135deg, #1e293b, #334155);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #10b981;
+    font-weight: 600;
+}
+
+/* 9️⃣ GLOW PULSE ON IMPORTANT ELEMENTS */
+@keyframes glowPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 40px rgba(16, 185, 129, 0.8);
+    }
+}
+
+.glow-pulse {
+    animation: glowPulse 2s ease-in-out infinite;
+}
+
+/* 🔟 SHAKE ANIMATION FOR ERRORS */
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-5px);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(5px);
+    }
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* 1️⃣1️⃣ NUMBER COUNT-UP ANIMATION */
+@keyframes countUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.8);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.count-up {
+    animation: countUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* 1️⃣2️⃣ GRADIENT BORDER ANIMATION */
+@keyframes gradientBorder {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.animated-border {
+    position: relative;
+    border: 2px solid transparent;
+    background: linear-gradient(#0f172a, #0f172a) padding-box,
+        linear-gradient(90deg, #10b981, #fbbf24, #10b981) border-box;
+    background-size: 200% 200%;
+    animation: gradientBorder 3s ease infinite;
+}
