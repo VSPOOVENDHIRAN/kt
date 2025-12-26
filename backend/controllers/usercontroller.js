@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs"); // needed for changePassword
 const usercontroller = {
 
   // 1. Get user profile
-  getUserProfile: async (req, res) => {
+  async getUserProfile (req, res) {
     try {
       const user = await User.findById(req.user.user_id).select("-password");
       if (!user) return res.status(404).json({ message: "User not found" });
@@ -16,7 +16,7 @@ const usercontroller = {
   },
 
   // 2. Change password
-  changePassword: async (req, res) => {
+  async changePassword (req, res) {
     try {
       const { currentPassword, newPassword } = req.body;
 
@@ -39,7 +39,7 @@ const usercontroller = {
   },
 
   // 3. Get balances
-  getBalances: async (req, res) => {
+  async getBalances (req, res) {
     try {
       const user = await User.findById(req.user.user_id)
         .select(
@@ -70,7 +70,7 @@ const usercontroller = {
   },
 
   // 4. Update balances
-  updateBalances: async (req, res) => {
+  async updateBalances (req, res) {
     try {
       const { wallet, tokens, energy } = req.body;
 
@@ -92,7 +92,7 @@ const usercontroller = {
   },
 
   // 5. Get technical info
-  getTechnicalInfo: async (req, res) => {
+  async getTechnicalInfo (req, res) {
     try {
       const user = await User.findById(req.user.id).select("meterId transformerId");
 
@@ -110,7 +110,7 @@ const usercontroller = {
   },
 
   // 6. Find user by meter ID
-  findUserByMeterId: async (meterId) => {
+  async findUserByMeterId (meterId) {
     if (!meterId) throw new Error("Meter ID is required");
 
     try {

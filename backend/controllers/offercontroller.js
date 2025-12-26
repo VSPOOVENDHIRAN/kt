@@ -44,28 +44,28 @@ exports.createoffer = async (req, res) => {
     session.startTransaction();
 
     // Destructure request body
-    const { creator_id, units, token_per_unit } = req.body;
+    const { user, units, token_per_unit } = req.body;
 
     // Validate required fields
-    if (!creator_id || !units || !token_per_unit) {
+    if (!user || !units || !token_per_unit) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(400).json({ msg: "Missing fields: creator_id, units, token_per_unit are required" });
+      return res.status(400).json({ msg: "Missing fields: user, units, token_per_unit are required" });
     }
 
-    // Find creator in DB
-    const creator = await User.findOne({ user_id: creator_id }).session(session);
+/*    // Find creator in DB
+    const creator = await User.findOne({ user_id: user }).session(session);
     if (!creator) {
       await session.abortTransaction();
       session.endSession();
       return res.status(404).json({ msg: "Creator not found" });
-    }
+    }*/
 
     // Save wallet address if missing
-    if (!creator.wallet_address) {
-      console.log("Fetching wallet address for creator:", creator.user_id);
-      creator.wallet_address = wallet_address;
-      await creator.save({ session });
+    if (!user.wallet_address) {
+      console.log("Fetching wallet address for creator:", user.user_id);
+      user.wallet_address = wallet_address;
+      await user.save({ session });
     }
 
     const unitsNum = Number(units);
@@ -76,22 +76,22 @@ exports.createoffer = async (req, res) => {
     // SELL OFFER: check energy balance
     // -----------------------------
     
-      if (Number(creator.energy_balance) < unitsNum) {
+      if (Number(user.energy_balance) < unitsNum) {
         await session.abortTransaction();
         session.endSession();
         return res.status(400).json({ msg: "Not enough energy to create sell offer" });
       }
 
-      creator.energy_balance -= unitsNum;
-      creator.reserved_energy += unitsNum;
+      user.energy_balance -= unitsNum;
+      user.reserved_energy += unitsNum;
     
     // -----------------------------
     // Create new offer
     // -----------------------------
     const offer = new Offer({
       offer_id: await generateOfferId(),
-      creator_id: creator.user_id,
-      transformer_id: creator.transformer_id,
+      creator_id: user.user_id,
+      transformer_id: user.transformer_id,
       units: unitsNum,
       token_per_unit: tokenPerUnit,
       total_tokens: totalTokens,
@@ -101,7 +101,7 @@ exports.createoffer = async (req, res) => {
     });
 
     // Save to DB
-    await creator.save({ session });
+    await user.save({ session });
     await offer.save({ session });
     await session.commitTransaction();
     session.endSession();
@@ -110,7 +110,7 @@ exports.createoffer = async (req, res) => {
     // Notify nearby users in real-time
     // -----------------------------
     const sameTransformerUsers = await User.find({
-      transformer_id: creator.transformer_id
+      transformer_id: user.transformer_id
     }).select("user_id");
 
     sameTransformerUsers.forEach(u => {
@@ -144,9 +144,9 @@ exports.canceloffer = async (req, res) => {
   try {
     session.startTransaction();
 
-    const { user_id, offer_id } = req.body;
+    const { user, offer_id } = req.body;
 
-    console.log("Cancel offer request:", user_id, offer_id);
+    console.log("Cancel offer request:", user.u, offer_id);
 
 
     if(!user_id )
@@ -232,7 +232,7 @@ exports.acceptoffer = async (req, res) => {
   session.startTransaction();
 
   try {
-    const { offer_id ,user_id ,unit } = req.body;
+    const { offer_id ,user ,unit } = req.body;
 
     //const user_id = req.user.user_id;
 
@@ -274,12 +274,12 @@ exports.acceptoffer = async (req, res) => {
     // -------------------------------
     // 4. Fetch counterparty user
     // -------------------------------
-    const buyer = await User.findOne({ user_id}).session(session);
+    //const buyer = await User.findOne({ user_id}).session(session);
 
-    console.log("Buyer found:", buyer.user_id);
-    console.log("Buyer wallet address:", buyer.wallet_address);
+    console.log("Buyer found:", user.user_id);
+    console.log("Buyer wallet address:", user.wallet_address);
 
-    if (!buyer) {
+    if (!user) {
       console.log("Counterparty not found:", user_id);
       await session.abortTransaction(); session.endSession();
       return res.status(404).json({ msg: "Counterparty not found" });
@@ -314,11 +314,11 @@ exports.acceptoffer = async (req, res) => {
     }
 
     creator.reserved_energy -= unit;
-    buyer.energy_balance += unit;
+    user.energy_balance += unit;
 
-    console.log("Energy balances updated. Seller reserved energy:", creator.reserved_energy, "Buyer energy balance:", buyer.energy_balance);
+    console.log("Energy balances updated. Seller reserved energy:", creator.reserved_energy, "Buyer energy balance:", user.energy_balance);
      
-    const balance_buyer = await get_balance(buyer.wallet_address);
+    const balance_buyer = await get_balance(user.wallet_address);
     console.log("Buyer token balance:", balance_buyer, "Needed tokens for trade:", needed_token);
     if (balance_buyer < needed_token) {
        await session.abortTransaction(); session.endSession();
@@ -327,7 +327,7 @@ exports.acceptoffer = async (req, res) => {
     }
     console.log("Buyer has sufficient token balance:", balance_buyer);
 const tx = await send_transaction({
-  from: buyer.wallet_address,
+  from: user.wallet_address,
   to: creator.wallet_address,
   amount: needed_token,
   unit:unit

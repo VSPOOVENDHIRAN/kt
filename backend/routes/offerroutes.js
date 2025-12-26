@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const offerController = require("../controllers/offercontroller");
-const auth = require("../middleware/auth");  // correct path
+const authMiddleware = require("../middleware/auth");
 
 // ---------------------- Offer Routes ----------------------
-router.post("/create", offerController.createoffer);
+router.post("/create", authMiddleware, offerController.createoffer);
 
-router.post("/cancel", offerController.canceloffer);
-router.post("/accept", offerController.acceptoffer);
+router.post("/cancel", authMiddleware, offerController.canceloffer);
+router.post("/accept", authMiddleware,offerController.acceptoffer);
 module.exports = router;

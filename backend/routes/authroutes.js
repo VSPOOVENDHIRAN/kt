@@ -1,16 +1,12 @@
 const express = require("express");
 const router = express.Router();
 
-const authController = require("../controllers/authcontroller");
-const userController = require("../controllers/usercontroller"); //  This is important
 const authMiddleware = require("../middleware/auth");
-// DEBUG: check types
-console.log("authMiddleware:", typeof authMiddleware);
-console.log("userController.getUserProfile:", typeof userController.getUserProfile);
 
-// --------------------- ROUTES ---------------------
+const authController = require("../controllers/authcontroller");
+const userController = require("../controllers/usercontroller");
+
 router.post("/check-device", authController.checkDevice);
-//router.post("/send-otp", authController.sendOtp);
 router.get("/profile", authMiddleware, userController.getUserProfile);
 router.post("/change-password", authMiddleware, userController.changePassword);
 

@@ -232,24 +232,37 @@ function formatTx(tx) {
     };
 }
 
-//for testing purpose only
+//for testing purpose onlyconst mapUsersToGanacheAccounts = async () => {\
 const mapUsersToGanacheAccounts = async () => {
- 
-  const accounts = await web3.eth.getAccounts();
- const user1 = await User.findOne({ user_id: "USR1001" });
-    if (user1) {
-      user1.wallet_address = accounts[0]; // matches your schema
-      await user1.save();
+  try {
+    // Get Ganache accounts (ONLY 10 exist)
+    const accounts = await web3.eth.getAccounts();
+
+    // Fetch first 10 users (or less if DB has less)
+    const users = await User.find({})
+      .sort({ createdAt: 1 })
+      .limit(10);
+
+    if (users.length === 0) {
+      console.log("⚠️ No users found");
+      return;
     }
 
-    // Map second user
-    const user2 = await User.findOne({ user_id: "USR1002" });
-    if (user2) {
-      user2.wallet_address = accounts[1];
-      await user2.save();
+    // Map users to wallets
+    for (let i = 0; i < users.length; i++) {
+      // Safety guard (in case users > wallets)
+      if (!accounts[i]) break;
+
+      users[i].wallet_address = accounts[i];
+      await users[i].save();
+
+      console.log(
+        `✅ ${users[i].user_id} → ${accounts[i]}`
+      );
     }
 
-    console.log("✅ Users mapped to Ganache accounts successfully");
-  //await user2.save();
-  
+    console.log(`🎉 Successfully mapped ${users.length} user(s)`);
+  } catch (error) {
+    console.error("❌ Mapping failed:", error.message);
+  }
 };

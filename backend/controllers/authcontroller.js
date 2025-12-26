@@ -158,10 +158,12 @@ const user_id = `USR${lastNumber + 1}`;
       const { email, password } = req.body;
       if (!email || !password) return res.status(400).json({ success: false, message: "Email and password required" });
       
+
       console.log("Login attempt for email:", email);
       const user = await User.findOne({ email });
       if (!user) return res.status(404).json({ success: false, message: "User not found" });
-
+      
+      console.log("pasword",bcrypt.hashSync(password, 10));
       const match = await bcrypt.compare(password, user.password);
       if (!match) return res.status(400).json({ success: false, message: "Invalid password" });
       
