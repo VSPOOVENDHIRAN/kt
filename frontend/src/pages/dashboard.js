@@ -17,6 +17,11 @@ export default function Dashboard() {
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showBookIntro, setShowBookIntro] = useState(false);
+    const [showLedgerModal, setShowLedgerModal] = useState(false);
+    const [ledgerData, setLedgerData] = useState([]);
+    const [ledgerLoading, setLedgerLoading] = useState(false);
+    const [searchUserId, setSearchUserId] = useState("");
+    const [filteredLedger, setFilteredLedger] = useState([]);
     const navigate = useNavigate();
 
     const token = localStorage.getItem("token");
@@ -154,6 +159,43 @@ export default function Dashboard() {
         );
     }
 
+    // Open Ledger Modal
+    const openLedger = async () => {
+        setShowLedgerModal(true);
+        setLedgerLoading(true);
+        console.log("[LEDGER] Fetching EB bills from backend...");
+        try {
+            const res = await fetch("http://localhost:5001/api/gov/eb-bills", {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await res.json();
+            console.log("[LEDGER] Response status:", res.ok, "Data:", data);
+            if (res.ok && data.success) {
+                console.log("[LEDGER] Setting ledger data, count:", data.count);
+                setLedgerData(data.data || []);
+                setFilteredLedger(data.data || []);
+            } else {
+                console.error("[LEDGER] API returned error:", data);
+            }
+        } catch (err) {
+            console.error("[LEDGER] Error fetching ledger:", err);
+        } finally {
+            setLedgerLoading(false);
+        }
+    };
+
+    const handleLedgerSearch = (userId) => {
+        setSearchUserId(userId);
+        if (!userId.trim()) {
+            setFilteredLedger(ledgerData);
+        } else {
+            const filtered = ledgerData.filter(item =>
+                item.user_id.toLowerCase().includes(userId.toLowerCase())
+            );
+            setFilteredLedger(filtered);
+        }
+    };
+
     // Shorten wallet address
     const shortenAddress = (address) => {
         if (!address) return "N/A";
@@ -223,6 +265,34 @@ export default function Dashboard() {
                     <p className="text-gray-500 text-sm mt-1">
                         Here's your energy trading overview
                     </p>
+                </div>
+
+                {/* Government Ledger Card - AT THE TOP */}
+                <div className="mb-6 card-stagger card-stagger-2">
+                    <div className="energy-card energy-card-blockchain p-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                    <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-200">Government Ledger</h3>
+                                    <p className="text-sm text-gray-400">Blockchain verified smart meter transactions for EB officials</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={openLedger}
+                                className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors flex items-center gap-2"
+                            >
+                                Open Ledger
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Header */}
@@ -429,6 +499,95 @@ export default function Dashboard() {
 
 
             </div>
+
+            {/* Government Ledger Modal */}
+            {showLedgerModal && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowLedgerModal(false)}>
+                    <div className="energy-card max-w-6xl w-full max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                        <div className="p-6 border-b border-gray-700 flex items-center justify-between">
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-200">Government Ledger</h2>
+                                <p className="text-sm text-gray-400 mt-1">EB Bill Verification Data</p>
+                            </div>
+                            <button
+                                onClick={() => setShowLedgerModal(false)}
+                                className="w-10 h-10 rounded-lg bg-gray-700 hover:bg-gray-600 flex items-center justify-center transition-colors"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+                            {/* Search */}
+                            <div className="mb-6 flex items-center gap-3 p-4 bg-energy-subtle rounded-lg border border-energy">
+                                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                <input
+                                    type="text"
+                                    placeholder="Search by User ID..."
+                                    value={searchUserId}
+                                    onChange={(e) => handleLedgerSearch(e.target.value)}
+                                    className="flex-1 bg-transparent border-none outline-none text-gray-300 placeholder-gray-500"
+                                />
+                            </div>
+
+                            {/* Total Users */}
+                            <div className="mb-4 text-sm text-gray-400">
+                                Total Users: <span className="text-solar font-semibold">{filteredLedger.length}</span>
+                            </div>
+
+                            {/* Table */}
+                            {ledgerLoading ? (
+                                <div className="text-center py-12">
+                                    <div className="skeleton w-16 h-16 rounded-full mx-auto mb-4"></div>
+                                    <p className="text-gray-400">Loading ledger data...</p>
+                                </div>
+                            ) : filteredLedger.length === 0 ? (
+                                <div className="text-center py-12 text-gray-400">
+                                    No data available
+                                </div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead>
+                                            <tr className="border-b border-gray-700">
+                                                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-400">User ID</th>
+                                                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-400">EB Bill Number</th>
+                                                <th className="text-right py-3 px-4 text-sm font-semibold text-gray-400">No. of Units Used (kWh)</th>
+                                                <th className="text-right py-3 px-4 text-sm font-semibold text-gray-400">Amount (₹)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {filteredLedger.map((item, index) => (
+                                                <tr
+                                                    key={index}
+                                                    className="border-b border-gray-800 hover:bg-energy-subtle transition-colors"
+                                                >
+                                                    <td className="py-3 px-4 text-sm font-mono text-blue-400">
+                                                        {item.user_id}
+                                                    </td>
+                                                    <td className="py-3 px-4 text-sm text-gray-300">
+                                                        {item.eb_bill_number}
+                                                    </td>
+                                                    <td className="py-3 px-4 text-sm text-right text-solar">
+                                                        {item.total_units.toFixed(2)}
+                                                    </td>
+                                                    <td className="py-3 px-4 text-sm text-right text-energy">
+                                                        ₹{item.total_amount.toFixed(2)}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }

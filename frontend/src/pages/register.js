@@ -46,16 +46,20 @@ export default function Register() {
         }
 
         setLoading(true);
+        console.log("[REGISTER] Sending OTP to:", phoneNumber);
 
         try {
             // Send OTP directly without device validation (this is signup, not login)
+            console.log("[REGISTER] Calling API: http://localhost:5001/api/auth/send-otp");
             const otpResponse = await fetch("http://localhost:5001/api/auth/send-otp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ phone: phoneNumber }),
             });
 
+            console.log("[REGISTER] Response status:", otpResponse.status);
             const otpData = await otpResponse.json();
+            console.log("[REGISTER] Response data:", otpData);
 
             if (otpResponse.ok && otpData.success) {
                 setSuccessMessage("OTP sent to your phone number!");
@@ -64,7 +68,7 @@ export default function Register() {
                 setError(otpData.message || "Failed to send OTP. Please try again.");
             }
         } catch (err) {
-            console.error("Phone verification error:", err);
+            console.error("[REGISTER] Phone verification error:", err);
             setError("Cannot reach server. Please try again later.");
         } finally {
             setLoading(false);

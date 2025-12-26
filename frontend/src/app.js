@@ -5,6 +5,7 @@ import Dashboard from "./pages/dashboard";
 import Profile from "./pages/profile";
 import History from "./pages/history";
 import TradePage from "./pages/trade";
+import GovtLedger from "./pages/govtledger";
 import AnimatedBackground from "./components/AnimatedBackgroundPure";
 import WelcomeHeader from "./components/WelcomeHeader";
 
@@ -21,6 +22,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/history" element={<History />} />
         <Route path="/trade" element={<TradePage />} />
+        <Route path="/govtledger" element={<GovtLedger />} />
       </Routes>
     </BrowserRouter>
   );

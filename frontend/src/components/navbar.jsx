@@ -5,6 +5,7 @@ import {
   ArrowPathIcon,
   ClockIcon,
   UserIcon,
+  DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 
 export default function NavigationBar({ active }) {

@@ -10,6 +10,7 @@ export default function History() {
   const fetchOffers = async () => {
     try {
       const token = localStorage.getItem("token");
+      console.log("[HISTORY] Fetching closed offers...");
       const res = await fetch("http://localhost:5001/api/offers/closed/30days", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -17,15 +18,18 @@ export default function History() {
       });
 
       if (!res.ok) {
+        console.error("[HISTORY] Server error:", res.status);
         setServerError(true);
         setLoading(false);
         return;
       }
 
       const data = await res.json();
-      setOffers(data.data || []);
+      console.log("[HISTORY] Response:", data);
+      setOffers(data.offers || data.data || []);
       setServerError(false);
     } catch (err) {
+      console.error("[HISTORY] Fetch error:", err);
       setServerError(true);
     } finally {
       setLoading(false);

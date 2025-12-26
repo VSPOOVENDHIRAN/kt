@@ -28,6 +28,7 @@
     "ganache": "node ganache/start_ganache.js",
     "deploy": "node blockchain/deploy.js",
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "seed": "node seed.js"
   }
 }

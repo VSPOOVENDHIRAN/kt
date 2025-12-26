@@ -2,11 +2,7 @@ const User = require("../models/user");
 const Device = require("../models/device"); // assuming you have device collection
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-<<<<<<< HEAD
 const { sendOTP, verifyOTP } = require("../utils/sendotp");
-=======
-//const { sendOTP } = require("../utils/sendotp");
->>>>>>> 972f4a3dc4952ab6cb7ba289b595ad5352207874
 
 const OTP_STORE = {}; // Backup for development mode only
 
@@ -22,14 +18,8 @@ const authController = {
         console.log("Device not registered for phone:", phone);
         return res.status(404).json({ success: false, message: "Device not registered" });
 
-<<<<<<< HEAD
       }
       console.log("Device found for phone:", phone);
-=======
-        }
-        console.log("Device found for phone:", phone);
-        sendOtp (phone);
->>>>>>> 972f4a3dc4952ab6cb7ba289b595ad5352207874
 
       res.json({ success: true, meter_id: device.meter_id, gridid: device.grid_id });
     } catch (err) {
@@ -38,48 +28,56 @@ const authController = {
     }
   },
 
-<<<<<<< HEAD
   // Step 2: Send OTP using Twilio Verify API
   async sendOtp(req, res) {
+    console.log('[OTP] === SEND OTP REQUEST ===');
+    console.log('[OTP] Request body:', req.body);
+
     try {
       const { phone } = req.body;
-      if (!phone) return res.status(400).json({ success: false, message: "Phone required" });
+      console.log('[OTP] Phone number:', phone);
+
+      if (!phone) {
+        console.log('[OTP] ERROR: Phone number missing');
+        return res.status(400).json({ success: false, message: "Phone required" });
+      }
 
       // Validate phone format
       if (!phone.startsWith('+')) {
+        console.log('[OTP] ERROR: Phone number missing country code');
         return res.status(400).json({
           success: false,
           message: "Phone number must include country code (e.g., +1234567890)"
         });
       }
 
+      console.log('[OTP] Calling sendOTP utility...');
       // Send OTP via Twilio Verify (OTP generation handled by Twilio)
       const result = await sendOTP(phone);
+      console.log('[OTP] sendOTP result:', result);
 
       if (result.success) {
-        console.log(`✓ OTP sent successfully for ${phone}`);
+        console.log(`[OTP] ✓ OTP sent successfully for ${phone}`);
         res.json({
           success: true,
           message: result.message || "OTP sent successfully"
         });
       } else {
+        console.log(`[OTP] ❌ OTP send failed for ${phone}`);
         res.status(400).json({
           success: false,
           message: result.message || "Failed to send OTP"
         });
       }
     } catch (err) {
-      console.error('❌ Send OTP error:', err);
+      console.error('[OTP] ❌ Send OTP error:', err);
+      console.error('[OTP] Error stack:', err.stack);
       res.status(500).json({
         success: false,
         message: err.message || "Failed to send OTP"
       });
     }
   },
-=======
-  // Step 2: Send OTP
-  
->>>>>>> 972f4a3dc4952ab6cb7ba289b595ad5352207874
 
   // Step 3: Verify OTP using Twilio Verify API
   async verifyOtp(req, res) {
@@ -122,30 +120,13 @@ const authController = {
     try {
       const { name, email, password, phone } = req.body;
 
-<<<<<<< HEAD
       // 1️⃣ Check if email already exists
-=======
-      // 1 Check if device exists
-      const device = await Device.findOne({ phone });
-
-      if (!device) {
-        return res.status(400).json({ error: "Device not registered" });
-      }
-
-      if(device.status=="inactive")
-      {
-        return res.status(400).json({ error: "Device is in activate" });
-      }
-       console.log("Device found for registration:", device.meter_id);
-     // 2 Check if email already exists
->>>>>>> 972f4a3dc4952ab6cb7ba289b595ad5352207874
       const emailExists = await User.findOne({ email });
       if (emailExists) {
         return res.status(400).json({ error: "Email is already registered" });
       }
       console.log("Email not registered:", email);
 
-<<<<<<< HEAD
       // 2️⃣ Check if phone already exists
       const phoneExists = await User.findOne({ phone });
       if (phoneExists) {
@@ -187,35 +168,6 @@ const authController = {
       const lastUser = await User.findOne().sort({ created_at: -1 });
       const lastNumber = lastUser ? parseInt(lastUser.user_id.replace("USR", "")) : 1000;
       const user_id = "USR" + (lastNumber + 1);
-=======
-      const phoneExists = await User.findOne({ phone });
-      if (phoneExists) {
-        return res.status(400).json({ error: "Phone is already registered" });
-      }
-        console.log("Phone not registered:", phone);
-
-      // 3️ Check if meter_id already assigned
-      const meterAssigned = await User.findOne({ meter_id: device.meter_id });
-
-      if (meterAssigned) {
-        return res.status(400).json({ error: "Device already linked to another user" });
-      }
-       console.log("Meter ID not linked, proceeding with registration:", device.meter_id);
-const lastUser = await User.findOne({ user_id: /^USR\d+$/ })
-  .sort({ created_at: -1 });
-
-let lastNumber = 1000;
-
-if (lastUser && lastUser.user_id) {
-  const match = lastUser.user_id.match(/^USR(\d+)$/);
-  if (match) {
-    lastNumber = Number(match[1]);
-  }
-}
-
-const user_id = `USR${lastNumber + 1}`;
-
->>>>>>> 972f4a3dc4952ab6cb7ba289b595ad5352207874
 
       // 5️⃣ Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -227,7 +179,6 @@ const user_id = `USR${lastNumber + 1}`;
         email,
         password: hashedPassword,
         phone,
-<<<<<<< HEAD
         meter_id: meter_id,
         transformer_id: transformer_id,
         grid_id: grid_id,
@@ -239,17 +190,6 @@ const user_id = `USR${lastNumber + 1}`;
         total_energy_sold: 0,
         total_energy_bought: 0,
         total_imported_energy: 0,
-=======
-        meter_id: device.meter_id,
-        transformer_id: device.transformer_id ,
-        grid_id: device.grid_id,
-       // wallet_address: "", // to be set later
-        energy_balance:0, 
-        reserved_energy:0, // locked for sell offers
-        total_energy_sold:0,            // P2P sold (kWh)
-        total_energy_bought:0 ,          // P2P bought (kWh)
-        total_imported_energy:0 ,          // From meter
->>>>>>> 972f4a3dc4952ab6cb7ba289b595ad5352207874
         total_exported_energy: 0,
         last_import_reading: 0,
         last_export_reading: 0,
@@ -291,8 +231,8 @@ const user_id = `USR${lastNumber + 1}`;
 
       const match = await bcrypt.compare(password, user.password);
       if (!match) return res.status(400).json({ success: false, message: "Invalid password" });
-      
-      
+
+
       user.last_login = new Date();
       await user.save();
 
@@ -306,24 +246,24 @@ const user_id = `USR${lastNumber + 1}`;
   }
 };
 
-const sendOtp = async(phone) => {
-    try {
+const sendOtp = async (phone) => {
+  try {
     //  const { phone } = req.body;
-      if (!phone) return res.status(400).json({ success: false, message: "Phone required" });
+    if (!phone) return res.status(400).json({ success: false, message: "Phone required" });
 
-      const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
-      const expires = Date.now() + 5 * 60 * 1000; // 5 min expiry
-      OTP_STORE[phone] = { otp, expires };
+    const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
+    const expires = Date.now() + 5 * 60 * 1000; // 5 min expiry
+    OTP_STORE[phone] = { otp, expires };
 
-     // await sendOTP(phone, otp); // implement SMS in utils/sendotp.js
+    // await sendOTP(phone, otp); // implement SMS in utils/sendotp.js
 
-      
-         console.log(`Sending OTP ${otp} to phone ${phone}`);
 
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ success: false, message: "Server error" });
-    }
+    console.log(`Sending OTP ${otp} to phone ${phone}`);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
+}
 
 module.exports = authController;

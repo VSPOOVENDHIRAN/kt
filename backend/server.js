@@ -113,6 +113,9 @@ app.use("/api/auth", authRoutes);
 const offerRoutes = require("./routes/offerroutes");
 app.use("/api/offers", offerRoutes);
 
+const govRoutes = require("./routes/govroutes");
+app.use("/api/gov", govRoutes);
+
 app.get("/", (req, res) => {
     res.send("P2P Energy Trading API running.");
 });

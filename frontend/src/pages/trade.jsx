@@ -42,22 +42,25 @@ export default function TradePage() {
   const fetchOffers = useCallback(async () => {
     try {
       setLoading(true);
+      console.log("[TRADE] Fetching offers from backend...");
 
       // My offers
-      const own = await axios.get(`${API}/api/offers/current`, {
+      const own = await axios.get(`${API}/api/offers/current/own`, {
         headers: authHeader(),
       });
-      setMyOffers(own.data.data || []);
+      console.log("[TRADE] Own offers response:", own.data);
+      setMyOffers(own.data.offers || []);
 
       // Market offers
       const all = await axios.get(`${API}/api/offers/current`, {
         headers: authHeader(),
       });
-      setMarketOffers(all.data.data || []);
+      console.log("[TRADE] Market offers response:", all.data);
+      setMarketOffers(all.data.offers || []);
 
       setError("");
     } catch (err) {
-      console.error("Fetch Offers Error:", err);
+      console.error("[TRADE] Fetch Offers Error:", err);
       const backendMessage =
         err.response?.data?.msg ||
         err.response?.data?.message ||
@@ -123,15 +126,18 @@ export default function TradePage() {
 
     const offerBody = {
       creator_id,
-      offer_type: newOffer.offer_type,
       units: unitsNum,
       token_per_unit: tokenRateNum,
     };
+
+    console.log("[TRADE] Creating offer:", offerBody);
 
     try {
       const res = await axios.post(`${API}/api/offers/create`, offerBody, {
         headers: authHeader(),
       });
+
+      console.log("[TRADE] Create offer response:", res.data);
 
       if (res.data && (res.data.offer || res.data.success)) {
         setNewOffer({ offer_type: "sell", units: "", token_per_unit: "" });
@@ -142,7 +148,7 @@ export default function TradePage() {
         setError(res.data?.message || "Offer created, but update failed.");
       }
     } catch (err) {
-      console.error("Create Offer Error:", err);
+      console.error("[TRADE] Create Offer Error:", err);
       const backendMessage = err.response?.data?.msg || err.response?.data?.message;
       setError(`Failed to create offer: ${backendMessage || "Unknown error"}`);
     }
@@ -260,11 +266,20 @@ export default function TradePage() {
       return;
     }
 
+    const payload = {
+      offer_id: offerId,
+      user_id: loggedUserId,
+      unit: Number(units)
+    };
+
+    console.log("[TRADE] Purchasing units:", payload);
+
     try {
-      const res = await axios.post(`${API}/api/offers/purchase`, {
-        offer_id: offerId,
-        units: Number(units)
-      }, { headers: authHeader() });
+      const res = await axios.post(`${API}/api/offers/accept`, payload, {
+        headers: authHeader()
+      });
+
+      console.log("[TRADE] Purchase response:", res.data);
 
       if (res.data.success) {
         alert("Purchase successful!");
@@ -272,7 +287,7 @@ export default function TradePage() {
         fetchOffers();
       }
     } catch (err) {
-      console.error("Purchase Error:", err);
+      console.error("[TRADE] Purchase Error:", err);
       const msg = err.response?.data?.msg || "Purchase failed";
       alert(msg);
     }
