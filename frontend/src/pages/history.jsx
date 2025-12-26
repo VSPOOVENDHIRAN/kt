@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import NavigationBar from "../components/navbar.jsx";
 import { BoltIcon, ClockIcon } from "@heroicons/react/24/outline";
 
 export default function History() {
@@ -10,6 +9,7 @@ export default function History() {
   const fetchOffers = async () => {
     try {
       const token = localStorage.getItem("token");
+      console.log("[HISTORY] Fetching closed offers...");
       const res = await fetch("http://localhost:5001/api/offers/closed/30days", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -17,15 +17,18 @@ export default function History() {
       });
 
       if (!res.ok) {
+        console.error("[HISTORY] Server error:", res.status);
         setServerError(true);
         setLoading(false);
         return;
       }
 
       const data = await res.json();
-      setOffers(data.data || []);
+      console.log("[HISTORY] Response:", data);
+      setOffers(data.offers || data.data || []);
       setServerError(false);
     } catch (err) {
+      console.error("[HISTORY] Fetch error:", err);
       setServerError(true);
     } finally {
       setLoading(false);
@@ -47,28 +50,29 @@ export default function History() {
   };
 
   return (
-    <div className="min-h-screen pb-24 bg-gradient-to-b from-green-700 via-emerald-600 to-slate-900 text-white px-4 py-6">
-      <h1 className="text-3xl md:text-4xl font-extrabold text-center mb-8 flex items-center justify-center gap-2">
-        ⚡ Energy Trading History
+    <div className="min-h-screen p-6 pb-24">
+      <h1 className="text-3xl font-bold text-center mb-8 animate-fade-in-up">
+        <span className="text-solar">Energy Trading</span>{" "}
+        <span className="text-energy">History</span>
       </h1>
 
       {/* Server error */}
       {serverError && (
-        <div className="text-center text-lg font-semibold text-red-300 bg-red-800/40 py-3 rounded-xl mb-4">
+        <div className="text-center text-lg font-semibold p-3 bg-red-500/20 border border-red-500 rounded-lg mb-4 animate-fade-in">
           ⚠️ Connecting to server...
         </div>
       )}
 
       {/* Loading */}
       {loading && !serverError && (
-        <div className="text-center text-lg font-semibold text-yellow-200 mb-4">
+        <div className="text-center text-lg font-semibold text-gray-300 mb-4 animate-fade-in">
           ⏳ Loading history...
         </div>
       )}
 
       {/* No offers */}
       {!loading && !serverError && offers.length === 0 && (
-        <div className="text-center text-xl text-gray-200 bg-white/10 py-5 rounded-xl border border-white/20 mb-4">
+        <div className="energy-card text-center text-xl mb-4 animate-fade-in">
           No closed offers in the last 30 days.
         </div>
       )}
@@ -77,23 +81,23 @@ export default function History() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {!loading &&
           !serverError &&
-          offers.map((offer) => (
+          offers.map((offer, index) => (
             <div
               key={offer._id}
-              className="rounded-3xl p-6 bg-white/10 backdrop-blur-lg shadow-xl border border-emerald-300/40 hover:shadow-green-400/40 transition hover:scale-[1.03] relative overflow-hidden text-white"
+              className="energy-card energy-card-solar animate-fade-in-up"
+              style={{ animationDelay: `${index * 0.05}s` }}
             >
-              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-yellow-300 to-green-400"></div>
-
               <div className="flex justify-between items-center mb-3">
                 <h2 className="font-bold text-lg flex items-center gap-2">
-                  <BoltIcon className="w-6 h-6 text-yellow-300" />
+                  <BoltIcon className="w-6 h-6 text-solar" />
                   {offer.offer_id}
                 </h2>
 
                 <span
-                  className={`px-3 py-1 rounded-full text-sm font-semibold capitalize ${
-                    statusColors[offer.status] || "bg-gray-700"
-                  }`}
+                  className={`status-badge ${offer.status === 'completed' ? 'status-completed' :
+                    offer.status === 'cancelled' ? 'status-cancelled' :
+                      'status-open'
+                    }`}
                 >
                   {offer.status}
                 </span>
@@ -101,7 +105,7 @@ export default function History() {
 
               <div className="space-y-1">
                 <p>
-                  <strong className="text-emerald-300">Type:</strong> {offer.offer_type}
+                  <strong className="text-energy">Type:</strong> {offer.offer_type}
                 </p>
                 <p>
                   <strong className="text-emerald-300">Units:</strong> {offer.units} kWh
@@ -139,7 +143,6 @@ export default function History() {
           ))}
       </div>
 
-      <NavigationBar active="History" />
     </div>
   );
 }

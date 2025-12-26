@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
-
-
 import {
   WalletIcon,
   CubeIcon,
@@ -9,30 +8,30 @@ import {
   UserIcon,
   CogIcon,
   KeyIcon,
-  ArrowRightOnRectangleIcon,
   EyeIcon,
   EyeSlashIcon,
+  ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
-
-// ✅ Use common navigation bar
-import NavigationBar from "../components/navbar.jsx";
 
 
 export default function Profile() {
+  const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // Password section states
   const [passwordMsg, setPasswordMsg] = useState("");
   const [showPasswordFields, setShowPasswordFields] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-
-  // Password visibility state
   const [showCurrentPass, setShowCurrentPass] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
 
   const token = localStorage.getItem("token");
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user_id");
+    navigate("/login");
+  };
 
   const fetchProfile = async () => {
     setLoading(true);
@@ -56,38 +55,35 @@ export default function Profile() {
 
     setLoading(false);
   };
-useEffect(() => {
-  if (!token) return;
 
-  // Initial fetch
-  fetchProfile();
+  useEffect(() => {
+    if (!token) return;
 
-  // Connect to socket.io
-  const socket = io("http://localhost:5001", {
-    auth: { token },
-  });
+    fetchProfile();
 
-  socket.on("connect", () => console.log("Socket connected:", socket.id));
+    const socket = io("http://localhost:5001", {
+      auth: { token },
+    });
 
-  socket.on("new_reading", (data) => {
-    console.log("Realtime update received:", data);
+    socket.on("connect", () => console.log("Socket connected:", socket.id));
 
-    // Merge only the changed fields into userData
-    setUserData((prev) => ({
-      ...prev,
-      energy_balance: data.energy_balance ?? prev.energy_balance,
-      last_import_reading: data.last_import_reading ?? prev.last_import_reading,
-      last_export_reading: data.last_export_reading ?? prev.last_export_reading,
-      total_energy_bought: data.total_energy_bought ?? prev.total_energy_bought,
-      total_energy_sold: data.total_energy_sold ?? prev.total_energy_sold,
-    }));
-  });
+    socket.on("new_reading", (data) => {
+      console.log("Realtime update received:", data);
 
-  socket.on("disconnect", () => console.log("Socket disconnected"));
+      setUserData((prev) => ({
+        ...prev,
+        energy_balance: data.energy_balance ?? prev.energy_balance,
+        last_import_reading: data.last_import_reading ?? prev.last_import_reading,
+        last_export_reading: data.last_export_reading ?? prev.last_export_reading,
+        total_energy_bought: data.total_energy_bought ?? prev.total_energy_bought,
+        total_energy_sold: data.total_energy_sold ?? prev.total_energy_sold,
+      }));
+    });
 
-  // Cleanup on unmount
-  return () => socket.disconnect();
-}, [token]);
+    socket.on("disconnect", () => console.log("Socket disconnected"));
+
+    return () => socket.disconnect();
+  }, [token]);
 
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword) {
@@ -98,7 +94,7 @@ useEffect(() => {
     setPasswordMsg("Processing...");
 
     try {
-      const res = await fetch("http://localhost:5001/api/auth/change-password", {
+      const res = await fetch("http://localhost:5001/api/users/change-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -121,175 +117,225 @@ useEffect(() => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    window.location.reload();
-  };
-
-  // Unauthorized
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-        <div className="w-full max-w-md bg-white p-8 md:p-10 rounded-2xl shadow-2xl border-t-8 border-red-500 text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Not Authenticated</h2>
-          <p className="text-gray-600 mb-6">You need to log in to view your profile.</p>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="energy-card max-w-md w-full text-center animate-fade-in">
+          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold mb-2">Not Authenticated</h2>
+          <p className="text-gray-400 mb-6">You need to log in to view your profile.</p>
+          <a href="/login" className="btn-energy inline-block">
+            Go to Login
+          </a>
         </div>
       </div>
     );
   }
 
-  // Loading
-  if (loading)
+  if (loading) {
     return (
-      <div className="p-6 text-center text-xl font-semibold text-gray-700 min-h-screen bg-gray-50 flex items-center justify-center">
-        Loading Profile...
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="skeleton w-16 h-16 rounded-full mx-auto mb-4"></div>
+          <p className="text-xl font-semibold text-gray-300">Loading Profile...</p>
+        </div>
       </div>
     );
+  }
 
-  // No user data
-  if (!userData)
+  if (!userData) {
     return (
-      <div className="p-6 text-center text-red-600 min-h-screen flex items-center justify-center">
-        Unable to fetch profile. Please try again later.
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="energy-card max-w-md text-center">
+          <p className="text-red-400 text-lg">Unable to fetch profile. Please try again later.</p>
+        </div>
       </div>
     );
+  }
 
   return (
-    <div className="p-6 pb-24 max-w-4xl mx-auto space-y-6 bg-gray-50 min-h-screen">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold text-gray-800 border-b pb-2">Profile</h1>
+    <div className="min-h-screen p-6 pb-24 max-w-6xl mx-auto">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-8 animate-fade-in-up">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">
+            <span className="text-solar">User</span>{" "}
+            <span className="text-energy">Profile</span>
+          </h1>
+          <p className="text-gray-400">Manage your energy trading account</p>
+        </div>
 
         <button
           onClick={handleLogout}
-          className="flex items-center space-x-1 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition shadow-md"
+          className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-all font-semibold"
         >
           <ArrowRightOnRectangleIcon className="w-5 h-5" />
           <span>Logout</span>
         </button>
       </div>
 
-      {/* Personal Info */}
-      <div className="bg-gradient-to-r from-emerald-600 to-green-700 text-white p-6 rounded-xl shadow-lg space-y-2">
-        <h2 className="text-xl font-bold flex items-center space-x-2">
-          <UserIcon className="w-6 h-6" />
-          <span>Personal & Identity</span>
-        </h2>
-        <p>
-          <strong>Name:</strong> {userData.name}
-        </p>
-        <p>
-          <strong>Email:</strong> {userData.email}
-        </p>
-        <p>
-          <strong>User ID:</strong> {userData.user_id}
-        </p>
+      {/* Personal Info Card */}
+      <div className="energy-card energy-card-solar mb-6 animate-fade-in-up delay-100">
+        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-700">
+          <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+            <UserIcon className="w-6 h-6 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold">Personal Information</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-energy-subtle p-4 rounded-lg border border-energy">
+            <p className="data-label">Full Name</p>
+            <p className="data-value">{userData.name}</p>
+          </div>
+          <div className="bg-energy-subtle p-4 rounded-lg border border-energy">
+            <p className="data-label">Email Address</p>
+            <p className="data-value text-base">{userData.email}</p>
+          </div>
+          <div className="bg-energy-subtle p-4 rounded-lg border border-energy">
+            <p className="data-label">User ID</p>
+            <p className="data-value text-base">{userData.user_id}</p>
+          </div>
+        </div>
       </div>
 
-      {/* Balances */}
-      <h2 className="text-xl font-bold text-gray-800 pt-2">Current Balances</h2>
+      {/* Balances Section */}
+      <h2 className="text-2xl font-bold mb-4 text-solar animate-fade-in-up delay-200">Current Balances</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-6 rounded-xl shadow border-l-4 border-indigo-500">
-          <div className="flex items-center space-x-2 mb-2">
-            <WalletIcon className="w-6 h-6 text-indigo-500" />
-            <h3 className="font-semibold text-lg text-gray-700">Wallet Balance</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fade-in-up delay-300">
+        {/* Wallet Balance */}
+        <div className="energy-card energy-card-blockchain">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+              <WalletIcon className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="font-semibold text-lg text-gray-300">Wallet Balance</h3>
           </div>
-          <p className="text-2xl font-extrabold text-indigo-700">{userData.wallet_balance}</p>
+          <p className="data-value data-value-solar">{userData.wallet_balance}</p>
+          <p className="data-label mt-2">Available funds</p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow border-l-4 border-teal-500">
-          <div className="flex items-center space-x-2 mb-2">
-            <CubeIcon className="w-6 h-6 text-teal-500" />
-            <h3 className="font-semibold text-lg text-gray-700">Token Balance</h3>
+        {/* Token Balance */}
+        <div className="energy-card energy-card-solar">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center">
+              <CubeIcon className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="font-semibold text-lg text-gray-300">Token Balance</h3>
           </div>
-          <p className="text-2xl font-extrabold text-teal-700">{userData.token_balance}</p>
+          <p className="data-value data-value-energy">{userData.token_balance}</p>
+          <p className="data-label mt-2">Energy tokens</p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow border-l-4 border-amber-500">
-          <div className="flex items-center space-x-2 mb-2">
-            <BoltIcon className="w-6 h-6 text-amber-500" />
-            <h3 className="font-semibold text-lg text-gray-700">Energy Balance</h3>
+        {/* Energy Balance */}
+        <div className="energy-card energy-card-solar">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center">
+              <BoltIcon className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="font-semibold text-lg text-gray-300">Energy Balance</h3>
           </div>
-          <p className="text-2xl font-extrabold text-amber-700">{userData.energy_balance}</p>
+          <p className="data-value data-value-solar">{userData.energy_balance}</p>
+          <p className="data-label mt-2">kWh available</p>
         </div>
       </div>
 
       {/* Reserved Balances */}
-      <h2 className="text-xl font-bold text-gray-800 pt-2">Reserved Balances</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white p-6 rounded-xl shadow border-l-4 border-teal-400">
-          <p className="font-semibold text-gray-700 mb-1">Reserved Token Balance</p>
-          <p className="text-2xl font-bold text-teal-600">{userData.reserved_tokens}</p>
+      <h2 className="text-2xl font-bold mb-4 text-energy animate-fade-in-up delay-400">Reserved Balances</h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 animate-fade-in-up delay-500">
+        <div className="energy-card">
+          <p className="data-label">Reserved Token Balance</p>
+          <p className="data-value data-value-energy">{userData.reserved_tokens}</p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow border-l-4 border-amber-400">
-          <p className="font-semibold text-gray-700 mb-1">Reserved Energy Balance</p>
-          <p className="text-2xl font-bold text-amber-600">{userData.reserved_energy} kWh</p>
+        <div className="energy-card">
+          <p className="data-label">Reserved Energy Balance</p>
+          <p className="data-value data-value-solar">{userData.reserved_energy} kWh</p>
         </div>
       </div>
 
       {/* Technical Info */}
-      <div className="bg-white p-6 rounded-xl shadow mt-4">
-        <div className="flex items-center space-x-2 mb-4 border-b pb-2">
-          <CogIcon className="w-6 h-6 text-gray-700" />
-          <h3 className="font-semibold text-xl text-gray-800">Technical Info & History</h3>
+      <div className="energy-card mb-6 animate-fade-in-up delay-600">
+        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-700">
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center">
+            <CogIcon className="w-6 h-6 text-white" />
+          </div>
+          <h3 className="text-2xl font-bold">Technical Information</h3>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 text-gray-700">
-          <div className="space-y-2">
-            <p><strong>Meter ID:</strong> {userData.meter_id}</p>
-            <p><strong>Transformer ID:</strong> {userData.transformer_id}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="bg-solar-subtle p-4 rounded-lg border border-solar">
+              <p className="data-label">Meter ID</p>
+              <p className="data-value text-base">{userData.meter_id}</p>
+            </div>
+            <div className="bg-solar-subtle p-4 rounded-lg border border-solar">
+              <p className="data-label">Transformer ID</p>
+              <p className="data-value text-base">{userData.transformer_id}</p>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <p><strong>Total Energy Sold:</strong> {userData.total_energy_sold}</p>
-            <p><strong>Total Energy Bought:</strong> {userData.total_energy_bought}</p>
+          <div className="space-y-4">
+            <div className="bg-energy-subtle p-4 rounded-lg border border-energy">
+              <p className="data-label">Total Energy Sold</p>
+              <p className="data-value text-base">{userData.total_energy_sold} kWh</p>
+            </div>
+            <div className="bg-energy-subtle p-4 rounded-lg border border-energy">
+              <p className="data-label">Total Energy Bought</p>
+              <p className="data-value text-base">{userData.total_energy_bought} kWh</p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Change Password */}
-      <div className="bg-white p-6 rounded-xl shadow">
-        <div className="flex justify-between items-center mb-4 border-b pb-2">
-          <div className="flex items-center space-x-2">
-            <KeyIcon className="w-6 h-6 text-red-500" />
-            <h3 className="font-semibold text-xl text-gray-800">Change Secure Key</h3>
+      <div className="energy-card animate-fade-in-up delay-700">
+        <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-700">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-600 rounded-lg flex items-center justify-center">
+              <KeyIcon className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="text-2xl font-bold">Change Secure Key</h3>
           </div>
 
           <button
             onClick={() => setShowPasswordFields(!showPasswordFields)}
-            className="text-emerald-600 hover:text-emerald-800 font-semibold transition p-1 rounded-lg"
+            className="btn-solar"
           >
             {showPasswordFields ? "Cancel" : "Update"}
           </button>
         </div>
 
         {showPasswordFields && (
-          <>
+          <div className="space-y-4">
             {passwordMsg && (
               <div
-                className={`p-2 mb-3 rounded-lg text-sm ${
-                  passwordMsg.includes("Success")
-                    ? "bg-green-100 text-green-700 border border-green-300"
-                    : "bg-red-100 text-red-700 border border-red-300"
-                }`}
+                className={`p-4 rounded-lg text-sm font-semibold ${passwordMsg.includes("Success")
+                  ? "status-completed"
+                  : "status-cancelled"
+                  }`}
               >
                 {passwordMsg}
               </div>
             )}
 
-            {/* Current Password */}
-            <div className="relative mb-3">
+            <div className="relative">
+              <label className="data-label">Current Secure Key</label>
               <input
                 type={showCurrentPass ? "text" : "password"}
-                placeholder="Current Secure Key"
-                className="border p-3 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400 transition"
+                placeholder="Enter current password"
+                className="input-energy pr-12"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
               />
               <button
                 type="button"
-                className="absolute right-3 top-3 text-gray-600"
+                className="absolute right-4 bottom-3 text-gray-400 hover:text-white transition-colors"
                 onClick={() => setShowCurrentPass(!showCurrentPass)}
               >
                 {showCurrentPass ? (
@@ -300,18 +346,18 @@ useEffect(() => {
               </button>
             </div>
 
-            {/* New Password */}
-            <div className="relative mb-4">
+            <div className="relative">
+              <label className="data-label">New Secure Key</label>
               <input
                 type={showNewPass ? "text" : "password"}
-                placeholder="New Secure Key"
-                className="border p-3 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400 transition"
+                placeholder="Enter new password"
+                className="input-energy pr-12"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
               />
               <button
                 type="button"
-                className="absolute right-3 top-3 text-gray-600"
+                className="absolute right-4 bottom-3 text-gray-400 hover:text-white transition-colors"
                 onClick={() => setShowNewPass(!showNewPass)}
               >
                 {showNewPass ? (
@@ -323,17 +369,15 @@ useEffect(() => {
             </div>
 
             <button
-              className="bg-emerald-600 text-white p-3 rounded-lg w-full hover:bg-emerald-700 transition font-semibold shadow-md"
+              className="btn-energy w-full"
               onClick={handleChangePassword}
             >
               {passwordMsg === "Processing..." ? "Updating..." : "Change Secure Key"}
             </button>
-          </>
+          </div>
         )}
       </div>
 
-      {/* ⭐ Common Navbar */}
-      <NavigationBar active="Profile" />
     </div>
   );
 }

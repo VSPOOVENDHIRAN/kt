@@ -1,3 +1,960 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Solar Energy + Blockchain Design System */
+:root {
+  /* Solar Energy Theme Colors */
+  --color-solar-yellow: #fbbf24;
+  --color-solar-orange: #f59e0b;
+  --color-energy-green: #10b981;
+  --color-dark-green: #065f46;
+  --color-deep-green: #064e3b;
+
+  /* Blockchain/Web3 Accents */
+  --color-blockchain-blue: #3b82f6;
+  --color-electric-teal: #14b8a6;
+  --color-cyber-purple: #8b5cf6;
+
+  /* Background - Professional Dark */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #1e293b;
+  --bg-card-hover: #334155;
+  --bg-input: #1e293b;
+
+  /* Text Colors */
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-accent: #fbbf24;
+
+  /* Borders */
+  --border-primary: #334155;
+  --border-accent: #10b981;
+  --border-solar: #fbbf24;
+
+  /* Shadows - Subtle, professional */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-glow-green: 0 0 20px rgba(16, 185, 129, 0.3);
+  --shadow-glow-yellow: 0 0 20px rgba(251, 191, 36, 0.3);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Professional Card Styles - NO WHITE GLOWS */
+.energy-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Remove hover effect - card stays static */
+.energy-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+.energy-card-solar {
+  border-left: 3px solid var(--color-solar-yellow);
+}
+
+.energy-card-blockchain {
+  border-left: 3px solid var(--color-blockchain-blue);
+}
+
+/* Button Styles - Professional, NO GLOWS */
+.btn-energy {
+  background: linear-gradient(135deg, var(--color-energy-green) 0%, var(--color-dark-green) 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-energy:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.2);
+}
+
+.btn-solar {
+  background: linear-gradient(135deg, var(--color-solar-orange) 0%, var(--color-solar-yellow) 100%);
+  color: #0f172a;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-solar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(251, 191, 36, 0.2);
+}
+
+/* Input Styles - Clean & Professional, NO GLOWS */
+.input-energy {
+  background: var(--bg-input);
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.input-energy:focus {
+  outline: none;
+  border-color: #ffffff;
+  background: var(--bg-secondary);
+}
+
+.input-energy::placeholder {
+  color: var(--text-muted);
+}
+
+/* Highlight outer border of card when inputs are focused */
+.energy-card:focus-within {
+  border-color: #ffffff;
+  background: var(--bg-card);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Chart Container Styles */
+.chart-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  height: 300px;
+  position: relative;
+}
+
+.chart-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.chart-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* Data Display - Enterprise Style */
+.data-label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.data-value {
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.data-value-solar {
+  color: var(--color-solar-yellow);
+}
+
+.data-value-energy {
+  color: var(--color-energy-green);
+}
+
+/* Smooth Animations - Professional, Not Flashy */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulseSubtle {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+/* Animation Classes */
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-pulse-subtle {
+  animation: pulseSubtle 3s ease-in-out infinite;
+}
+
+/* Stagger animation delays */
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+.delay-300 {
+  animation-delay: 0.3s;
+}
+
+.delay-400 {
+  animation-delay: 0.4s;
+}
+
+.delay-500 {
+  animation-delay: 0.5s;
+}
+
+.delay-600 {
+  animation-delay: 0.6s;
+}
+
+.delay-700 {
+  animation-delay: 0.7s;
+}
+
+.delay-800 {
+  animation-delay: 0.8s;
+}
+
+.delay-900 {
+  animation-delay: 0.9s;
+}
+
+.delay-1000 {
+  animation-delay: 1s;
+}
+
+/* ===================================
+   MetaMask-Style Professional Animations
+   =================================== */
+
+/* Login Card Entry Animation */
+@keyframes loginCardEntry {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-login-entry {
+  animation: loginCardEntry 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Input Focus - Subtle Border Transition */
+.input-energy {
+  transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input-energy:focus {
+  border-color: var(--color-energy-green);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Button Micro-Interactions */
+.btn-energy,
+.btn-solar {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-energy:hover:not(:disabled),
+.btn-solar:hover:not(:disabled) {
+  transform: translateY(-1px) scale(1.01);
+}
+
+.btn-energy:active:not(:disabled),
+.btn-solar:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Tab Content Transition */
+@keyframes tabContentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tab-content-enter {
+  animation: tabContentFadeIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Tab Button Active State */
+.tab-button {
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.tab-button::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--color-energy-green);
+  transition: width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.tab-button.active::after {
+  width: 100%;
+}
+
+/* Staggered Card Entry */
+@keyframes cardStaggerEntry {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-stagger-entry {
+  animation: cardStaggerEntry 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  opacity: 0;
+}
+
+/* ===================================
+   Post-Login Celebration Animation
+   Enhanced & More Exciting
+   =================================== */
+
+/* Radial Success Ripple */
+@keyframes successRipple {
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(16, 185, 129, 0.7),
+      0 0 0 0 rgba(251, 191, 36, 0.7),
+      0 20px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 20px rgba(16, 185, 129, 0),
+      0 0 0 40px rgba(251, 191, 36, 0),
+      0 30px 60px rgba(16, 185, 129, 0.2);
+  }
+
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(16, 185, 129, 0),
+      0 0 0 0 rgba(251, 191, 36, 0),
+      0 20px 40px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Success Scale & Glow */
+@keyframes successScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Success Border Pulse */
+@keyframes borderPulse {
+
+  0%,
+  100% {
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+
+  50% {
+    border-color: rgba(16, 185, 129, 0.8);
+  }
+}
+
+.celebrate-login {
+  animation:
+    successScale 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+    successRipple 1s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    borderPulse 1s ease-in-out;
+}
+
+/* Enhanced Shimmer with Gradient */
+@keyframes enhancedShimmer {
+  0% {
+    background-position: -200% center;
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    background-position: 200% center;
+    opacity: 0;
+  }
+}
+
+.success-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.success-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(110deg,
+      transparent 0%,
+      transparent 40%,
+      rgba(16, 185, 129, 0.3) 50%,
+      rgba(251, 191, 36, 0.3) 55%,
+      transparent 60%,
+      transparent 100%);
+  background-size: 200% 100%;
+  animation: enhancedShimmer 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+}
+
+/* Success Checkmark Animation */
+@keyframes checkmarkDraw {
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes checkmarkScale {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.success-checkmark {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  z-index: 9999;
+  pointer-events: none;
+  animation: checkmarkScale 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.success-checkmark circle {
+  fill: rgba(16, 185, 129, 0.2);
+  stroke: rgba(16, 185, 129, 0.8);
+  stroke-width: 3;
+}
+
+.success-checkmark path {
+  stroke: #10b981;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: checkmarkDraw 0.6s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+/* Enhanced Particle Burst */
+@keyframes particleFloat {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0) rotate(0deg);
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx), var(--ty)) scale(1.5) rotate(var(--rotate));
+  }
+}
+
+.success-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: particleFloat 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Success Text Animation */
+@keyframes successTextFade {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  20%,
+  80% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.success-text {
+  position: fixed;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #10b981;
+  z-index: 9999;
+  pointer-events: none;
+  animation: successTextFade 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+}
+
+/* ===================================
+   Page Navigation Transitions
+   Subtle & Professional
+   =================================== */
+
+/* Simple Fade Out */
+@keyframes pageExit {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+/* Simple Fade In with Minimal Lift */
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.morph-exit {
+  animation: pageExit 0.2s ease-out forwards;
+}
+
+.morph-enter {
+  animation: pageEnter 0.3s ease-out forwards;
+}
+
+/* Perspective container - minimal */
+.perspective-container {
+  position: relative;
+}
+
+/* ===================================
+   Bottom Navigation Tab Animations
+   Cinematic PPT-Style Motion
+   =================================== */
+
+/* Active Tab Icon - Lift & Pop */
+@keyframes tabIconLift {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-8px) scale(1.15);
+  }
+
+  100% {
+    transform: translateY(-4px) scale(1.1);
+  }
+}
+
+.tab-button {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: center bottom;
+}
+
+.tab-button.active {
+  animation: tabIconLift 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.tab-button:not(.active) {
+  transform: translateY(0) scale(1);
+}
+
+/* Icon Scale on Active */
+.tab-button svg,
+.tab-button .tab-icon {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tab-button.active svg,
+.tab-button.active .tab-icon {
+  transform: scale(1.15);
+}
+
+/* Morphing Indicator - Fluid Flow */
+.tab-button::before {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 80%;
+  height: 4px;
+  background: linear-gradient(90deg, #10b981, #fbbf24);
+  border-radius: 2px 2px 0 0;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.3s ease;
+  opacity: 0;
+}
+
+.tab-button.active::before {
+  transform: translateX(-50%) scaleX(1);
+  opacity: 1;
+}
+
+/* Touch Ripple Effect */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+.tab-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  background: rgba(16, 185, 129, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+}
+
+.tab-button:active::after {
+  animation: ripple 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Tab Label Animation */
+.tab-button span {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tab-button.active span {
+  font-weight: 700;
+  transform: scale(1.05);
+}
+
+/* Smooth Background Transition */
+.tab-button {
+  background: transparent;
+  transition: background 0.3s ease;
+  color: #9ca3af;
+}
+
+.tab-button.active {
+  background: rgba(16, 185, 129, 0.1);
+  color: #fbbf24;
+}
+
+/* Settle Animation After Transition */
+@keyframes settleTab {
+  0% {
+    transform: translateY(-2px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.tab-settle {
+  animation: settleTab 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Bottom Navigation Container - Clean & Flat */
+.bottom-nav-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  /* NO glow, NO blur, NO shadow */
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+/* Page Content Padding - Prevent Overlap with Bottom Nav */
+body {
+  padding-bottom: 80px;
+  /* Height of bottom nav + spacing */
+}
+
+/* Ensure main content areas respect bottom nav */
+main,
+.page-container,
+.content-wrapper {
+  padding-bottom: 80px;
+}
+
+
+
+
+/* Status Badges - Professional */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-open {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-negotiation {
+  background: rgba(251, 191, 36, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.status-completed {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.status-cancelled {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Gradient Text - Solar Energy */
+.gradient-text-solar {
+  background: linear-gradient(135deg, var(--color-solar-yellow) 0%, var(--color-solar-orange) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-energy {
+  background: linear-gradient(135deg, var(--color-energy-green) 0%, var(--color-electric-teal) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Loading States */
+.skeleton {
+  background: linear-gradient(90deg,
+      var(--bg-card) 0%,
+      var(--bg-card-hover) 50%,
+      var(--bg-card) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Scrollbar - Professional */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-energy-green);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-solar-yellow);
+}
+
+/* Grid Layouts - Responsive */
+.energy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Utility Classes */
+.text-solar {
+  color: var(--color-solar-yellow);
+}
+
+.text-energy {
+  color: var(--color-energy-green);
+}
+
+.border-solar {
+  border-color: var(--color-solar-yellow);
+}
+
+.border-energy {
+  border-color: var(--color-energy-green);
+}
+
+.bg-solar-subtle {
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.bg-energy-subtle {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+/* ===================================
+   MetaMask-Style Dashboard Reveal Animation
+   Handled by Three.js WebGL in DashboardReveal.jsx
+   =================================== */

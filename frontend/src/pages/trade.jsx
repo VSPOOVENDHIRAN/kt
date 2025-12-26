@@ -42,22 +42,25 @@ export default function TradePage() {
   const fetchOffers = useCallback(async () => {
     try {
       setLoading(true);
+      console.log("[TRADE] Fetching offers from backend...");
 
       // My offers
-      const own = await axios.get(`${API}/api/offers/current`, {
+      const own = await axios.get(`${API}/api/offers/current/own`, {
         headers: authHeader(),
       });
-      setMyOffers(own.data.data || []);
+      console.log("[TRADE] Own offers response:", own.data);
+      setMyOffers(own.data.offers || []);
 
       // Market offers
       const all = await axios.get(`${API}/api/offers/current`, {
         headers: authHeader(),
       });
-      setMarketOffers(all.data.data || []);
+      console.log("[TRADE] Market offers response:", all.data);
+      setMarketOffers(all.data.offers || []);
 
       setError("");
     } catch (err) {
-      console.error("Fetch Offers Error:", err);
+      console.error("[TRADE] Fetch Offers Error:", err);
       const backendMessage =
         err.response?.data?.msg ||
         err.response?.data?.message ||
@@ -123,15 +126,18 @@ export default function TradePage() {
 
     const offerBody = {
       creator_id,
-      offer_type: newOffer.offer_type,
       units: unitsNum,
       token_per_unit: tokenRateNum,
     };
+
+    console.log("[TRADE] Creating offer:", offerBody);
 
     try {
       const res = await axios.post(`${API}/api/offers/create`, offerBody, {
         headers: authHeader(),
       });
+
+      console.log("[TRADE] Create offer response:", res.data);
 
       if (res.data && (res.data.offer || res.data.success)) {
         setNewOffer({ offer_type: "sell", units: "", token_per_unit: "" });
@@ -142,7 +148,7 @@ export default function TradePage() {
         setError(res.data?.message || "Offer created, but update failed.");
       }
     } catch (err) {
-      console.error("Create Offer Error:", err);
+      console.error("[TRADE] Create Offer Error:", err);
       const backendMessage = err.response?.data?.msg || err.response?.data?.message;
       setError(`Failed to create offer: ${backendMessage || "Unknown error"}`);
     }
@@ -248,6 +254,46 @@ export default function TradePage() {
   };
 
   // -------------------------------
+  // PURCHASE UNITS (PARTIAL)
+  // -------------------------------
+  const handlePurchase = async (offerId, units) => {
+    const confirmPurchase = window.confirm(`Confirm purchase of ${units} units?`);
+    if (!confirmPurchase) return;
+
+    const loggedUserId = localStorage.getItem("user_id");
+    if (!loggedUserId) {
+      alert("Please log in.");
+      return;
+    }
+
+    const payload = {
+      offer_id: offerId,
+      user_id: loggedUserId,
+      unit: Number(units)
+    };
+
+    console.log("[TRADE] Purchasing units:", payload);
+
+    try {
+      const res = await axios.post(`${API}/api/offers/accept`, payload, {
+        headers: authHeader()
+      });
+
+      console.log("[TRADE] Purchase response:", res.data);
+
+      if (res.data.success) {
+        alert("Purchase successful!");
+        socket.emit("offersUpdated");
+        fetchOffers();
+      }
+    } catch (err) {
+      console.error("[TRADE] Purchase Error:", err);
+      const msg = err.response?.data?.msg || "Purchase failed";
+      alert(msg);
+    }
+  };
+
+  // -------------------------------
   // OFFER CARD COMPONENT
   // -------------------------------
   const OfferCard = ({
@@ -258,69 +304,30 @@ export default function TradePage() {
     cancelNegotiation,
   }) => {
     const created = offer.created_at ? new Date(offer.created_at) : null;
-    const [negotiatedPrice, setNegotiatedPrice] = useState("");
+    const [purchaseUnits, setPurchaseUnits] = useState(1); // Default 1 unit
 
-    const handleNegotiate = async () => {
-      const loggedUserId = localStorage.getItem("user_id");
-      if (!loggedUserId) {
-        alert("User not logged in.");
-        return;
-      }
-
-      const priceNum = Number(negotiatedPrice);
-      if (isNaN(priceNum) || priceNum <= 0) {
-        alert("Enter a valid positive token/unit price.");
-        return;
-      }
-
-      try {
-        const res = await axios.post(
-          `${API}/api/offers/negotiate`,
-          {  user_id: loggedUserId,
-            
-            offer_id: offer.offer_id || offer._id,
-            negotiated_tokens: priceNum,
-          },
-          { headers: authHeader() }
-        );
-
-        if (res.data.success) {
-          alert("Negotiation submitted successfully!");
-          setNegotiatedPrice("");
-          socket.emit("offersUpdated");
-          fetchOffers();
-        } else {
-          alert(res.data.message || "Failed to negotiate.");
-        }
-      } catch (err) {
-        console.error("Negotiate Error:", err.response?.data || err.message || err);
-        alert("Server error while submitting negotiation.");
-      }
-    };
+    // Calculate total cost for selected units
+    const totalPurchaseCost = (purchaseUnits * offer.token_per_unit).toFixed(2);
 
     return (
       <div
-        className={`p-5 rounded-xl shadow-xl transition-all duration-300 transform hover:scale-[1.02]
-      ${offer.offer_type === "sell"
-            ? "bg-blue-800/70 border-l-4 border-blue-300"
-            : "bg-red-800/70 border-l-4 border-red-300"
-          }`}
+        className={`energy-card ${offer.offer_type === "sell" ? "energy-card-solar" : "energy-card-blockchain"
+          } transition-all duration-300`}
       >
         {/* Header */}
-        <div className="flex justify-between items-start mb-3 border-b border-white/20 pb-2">
+        <div className="flex justify-between items-start mb-3 pb-2 border-b border-gray-700">
           <h3 className="font-extrabold text-lg flex items-center gap-2">
-            <ArrowRightIcon className="w-5 h-5 text-yellow-400" />
+            <ArrowRightIcon className="w-5 h-5 text-solar" />
             {String(offer.offer_type || "").toUpperCase()} OFFER
           </h3>
 
           <span
-            className={`px-3 py-1 text-xs rounded-full font-bold shadow-md ${
-              offer.status === "open"
-                ? "bg-green-500"
-                : offer.status === "negotiation"
-                  ? "bg-yellow-500"
-                  : "bg-gray-500"
-            }`}
+            className={`status-badge ${offer.status === "open"
+              ? "status-open"
+              : offer.status === "negotiation"
+                ? "status-negotiation"
+                : "status-completed"
+              }`}
           >
             {String(offer.status || "").toUpperCase()}
           </span>
@@ -331,13 +338,15 @@ export default function TradePage() {
           <p>
             <b>ID:</b> {offer.offer_id || offer._id}
           </p>
-          <p>
-            <b>Units:</b>{" "}
-            <span className="font-semibold text-lg">{offer.units}</span> kWh
-          </p>
-          <p>
-            <b>Rate:</b> {offer.token_per_unit} Tokens/unit
-          </p>
+          <div className="flex justify-between items-center">
+            <p>
+              <b>Available:</b>{" "}
+              <span className="font-semibold text-lg">{offer.units}</span> kWh
+            </p>
+            <p className="text-solar font-bold">
+              {offer.token_per_unit} T/unit
+            </p>
+          </div>
 
           {offer.status === "negotiation" && offer.negotiated_tokens && (
             <p className="text-yellow-300">
@@ -345,15 +354,11 @@ export default function TradePage() {
             </p>
           )}
 
-          <p className="pt-2 font-bold text-yellow-300">
-            Total Value: {offer.total_tokens}
-          </p>
-
-          <p className="flex items-center gap-1 text-xs text-white/70 pt-2">
+          <p className="flex items-center gap-1 text-xs text-gray-400 pt-2">
             <UserIcon className="w-4 h-4" /> Creator: {offer.creator_id}
           </p>
 
-          <p className="flex items-center gap-1 text-xs text-white/70">
+          <p className="flex items-center gap-1 text-xs text-gray-400">
             <ClockIcon className="w-4 h-4" /> Created:{" "}
             {created ? created.toLocaleString() : "—"}
           </p>
@@ -363,7 +368,7 @@ export default function TradePage() {
         {isOwnOffer && offer.status === "open" && (
           <button
             onClick={() => handleCancelOffer(offer.offer_id || offer._id)}
-            className="mt-3 bg-red-500 hover:bg-red-600 text-white font-bold px-3 py-2 rounded-lg shadow-md"
+            className="mt-3 bg-red-500 hover:bg-red-600 text-white font-bold px-3 py-2 rounded-lg shadow-md w-full"
           >
             Cancel Offer
           </button>
@@ -373,46 +378,52 @@ export default function TradePage() {
           <div className="mt-4 flex gap-3">
             <button
               onClick={() => acceptNegotiation(offer.offer_id)}
-              className="bg-green-600 hover:bg-green-700 text-white font-bold px-3 py-2 rounded-lg shadow-md"
+              className="bg-green-600 hover:bg-green-700 text-white font-bold px-3 py-2 rounded-lg shadow-md flex-1"
             >
-              Accept Negotiation
+              Accept
             </button>
 
             <button
               onClick={() => cancelNegotiation(offer.offer_id)}
-              className="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-2 rounded-lg shadow-md"
+              className="bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-2 rounded-lg shadow-md flex-1"
             >
-              Cancel Negotiation
+              Reject
             </button>
           </div>
         )}
 
-        {/* Market Offer Buttons */}
+        {/* Market Offer Purchase */}
         {!isOwnOffer && offer.status === "open" && (
-          <div className="mt-4 flex flex-col gap-2">
-            <button
-              onClick={() => acceptNegotiation(offer.offer_id)}
-              className="bg-green-600 hover:bg-green-700 text-white font-bold px-3 py-2 rounded-lg shadow-md"
-            >
-              Accept Offer
-            </button>
-
-            <div className="flex gap-2">
-              <input
-                type="number"
-                placeholder="Enter token/unit"
-                value={negotiatedPrice}
-                onChange={(e) =>
-                  setNegotiatedPrice(e.target.value.replace(/[^0-9.]/g, ""))
-                }
-                className="text-gray-800 px-2 py-1 w-full rounded-lg border border-gray-300"
-              />
-              <button
-                onClick={handleNegotiate}
-                className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold px-3 py-1 rounded-lg shadow-md"
-              >
-                Negotiate
-              </button>
+          <div className="mt-4">
+            <div className="bg-gray-800/50 p-3 rounded-lg border border-gray-700">
+              <div className="flex justify-between text-xs mb-2 text-gray-300">
+                <span>Purchase Quantity:</span>
+                <span>Total: <b className="text-solar">{totalPurchaseCost} Tokens</b></span>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  min="1"
+                  max={offer.units}
+                  value={purchaseUnits}
+                  onChange={(e) => {
+                    let val = parseInt(e.target.value);
+                    if (isNaN(val)) val = 1;
+                    if (val > offer.units) val = offer.units;
+                    if (val < 1) val = 1;
+                    setPurchaseUnits(val);
+                  }}
+                  className="w-20 rounded bg-gray-700 border border-gray-600 px-2 py-1 text-white text-center"
+                  placeholder="Qty"
+                />
+                <button
+                  onClick={() => handlePurchase(offer.offer_id || offer._id, purchaseUnits)}
+                  disabled={purchaseUnits <= 0 || purchaseUnits > offer.units}
+                  className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold px-3 py-2 rounded-lg shadow-md transition-colors"
+                >
+                  Buy Now
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -454,46 +465,47 @@ export default function TradePage() {
   // RENDER UI
   // -------------------------------
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-600 to-green-800 text-white p-6 pb-24 font-inter">
-      <h1 className="text-3xl font-bold text-center mb-6 flex items-center justify-center gap-2">
-        <BoltIcon className="w-8 h-8 text-yellow-300" />
-        Energy Trading
+    <div className="min-h-screen p-6 pb-24">
+      <h1 className="text-3xl font-bold text-center mb-6 animate-fade-in-up">
+        <span className="text-solar">Energy</span>{" "}
+        <span className="text-energy">Trading</span>
       </h1>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-800/80 rounded-lg text-red-100 font-semibold shadow-inner">
+        <div className="mb-4 p-3 bg-red-500/20 border border-red-500 rounded-lg text-red-200 font-semibold animate-fade-in">
           ⚠ {error}
         </div>
       )}
 
       {/* CREATE OFFER */}
-      <div className="bg-green-700/70 backdrop-blur-sm rounded-xl p-5 mb-8 shadow-2xl border-2 border-green-400/50">
-        <h2 className="font-bold text-xl mb-3 border-b border-green-500 pb-2">
+      <div className="energy-card energy-card-solar mb-8 animate-fade-in-up delay-100">
+        <h2 className="font-bold text-xl mb-3 pb-2 border-b border-gray-700">
           Create New Offer
         </h2>
 
         <form
-          className="grid grid-cols-2 md:grid-cols-5 gap-3 items-end"
+          className="flex flex-col md:flex-row gap-4 items-end"
           onSubmit={handleCreateOffer}
         >
-          <div>
-            <label className="block mb-1 text-sm font-medium">Type</label>
+          <div className="flex-1">
+            <label className="block mb-2 text-sm font-medium text-gray-300">Type</label>
             <select
               value={newOffer.offer_type}
               onChange={(e) =>
                 setNewOffer({ ...newOffer, offer_type: e.target.value })
               }
-              className="text-gray-800 px-3 py-2 w-full rounded-lg bg-white/90 border border-gray-300"
+              className="w-full px-4 py-2.5 rounded-lg bg-[#1e293b] border border-gray-700 text-white focus:border-white focus:outline-none transition-all h-11"
             >
-              <option value="sell">Sell (Energy)</option>
-              <option value="buy">Buy (Energy)</option>
+              <option value="sell" className="bg-[#1e293b] text-white">Sell Energy</option>
+              <option value="buy" className="bg-[#1e293b] text-white">Buy Energy</option>
             </select>
           </div>
 
-          <div>
-            <label className="block mb-1 text-sm font-medium">Units (kWh)</label>
+          <div className="flex-1">
+            <label className="block mb-2 text-sm font-medium text-gray-300">Units (kWh)</label>
             <input
               type="number"
+              placeholder="Enter units"
               value={newOffer.units}
               onChange={(e) =>
                 setNewOffer({
@@ -501,15 +513,16 @@ export default function TradePage() {
                   units: e.target.value.replace(/[^0-9.]/g, ""),
                 })
               }
-              className="text-gray-800 px-3 py-2 w-full rounded-lg bg-white/90 border border-gray-300"
+              className="input-energy h-11"
               min="1"
             />
           </div>
 
-          <div>
-            <label className="block mb-1 text-sm font-medium">Token / Unit</label>
+          <div className="flex-1">
+            <label className="block mb-2 text-sm font-medium text-gray-300">Token / Unit</label>
             <input
               type="number"
+              placeholder="Enter rate"
               value={newOffer.token_per_unit}
               onChange={(e) =>
                 setNewOffer({
@@ -517,83 +530,95 @@ export default function TradePage() {
                   token_per_unit: e.target.value.replace(/[^0-9.]/g, ""),
                 })
               }
-              className="text-gray-800 px-3 py-2 w-full rounded-lg bg-white/90 border border-gray-300"
+              className="input-energy h-11"
               min="1"
             />
           </div>
 
-          <div className="text-center bg-green-800/50 p-2 rounded-lg">
-            <p className="text-xs text-green-200">
-              Total {newOffer.offer_type === "buy" ? "Cost" : "Earning"}
-            </p>
-            <p className="font-bold text-lg text-yellow-300">
-              {totalTokens.toFixed(2)} Tokens
-            </p>
+          <div className="bg-[#1e293b] border border-gray-700 p-3 rounded-lg h-11 flex items-center px-4">
+            <div>
+              <p className="text-xs text-gray-400 leading-none">Total {newOffer.offer_type === "buy" ? "Cost" : "Earning"}</p>
+              <p className="font-bold text-sm text-solar leading-none mt-1">{totalTokens.toFixed(2)} Tokens</p>
+            </div>
           </div>
 
           <button
             type="submit"
-            className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold px-4 py-2 rounded-lg shadow-md"
+            className="btn-solar px-8 py-2.5 h-11 whitespace-nowrap"
           >
             Create Offer
           </button>
         </form>
       </div>
 
-      {/* YOUR OFFERS */}
-      <h2 className="font-bold text-2xl mb-3 text-yellow-300 text-center">
+      {/* MARKET OFFERS - MOVED TO TOP */}
+      <div className="mb-12">
+        <h2 className="font-bold text-3xl mb-2 text-center animate-fade-in-up delay-100">
+          <span className="text-energy">⚡ Market Offers</span>{" "}
+          <span className="text-white/80">Near You</span>
+        </h2>
+        <p className="text-center text-gray-400 mb-6 text-sm">Browse and purchase energy from sellers in your area</p>
+
+        {loading ? (
+          <p className="energy-card text-center text-xl p-8 animate-fade-in">
+            <ClockIcon className="w-6 h-6 inline-block animate-spin mr-2" />
+            Loading...
+          </p>
+        ) : filteredMarketOffers.length === 0 ? (
+          <p className="energy-card text-center text-lg p-5 animate-fade-in">
+            No available offers in your transformer area.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredMarketOffers.map((offer, index) => (
+              <div
+                key={offer.offer_id || offer._id}
+                className="animate-fade-in-up"
+                style={{ animationDelay: `${(index + 1) * 0.05}s` }}
+              >
+                <OfferCard
+                  offer={offer}
+                  isOwnOffer={false}
+                  handleCancelOffer={handleCancelOffer}
+                  acceptNegotiation={acceptNegotiation}
+                  cancelNegotiation={cancelNegotiation}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* YOUR OFFERS - MOVED TO BOTTOM */}
+      <h2 className="font-bold text-2xl mb-3 text-solar text-center animate-fade-in-up delay-200">
         Your Active Offers
       </h2>
 
       {loading ? (
-        <p className="text-center text-xl p-8 bg-green-700/50 rounded-lg">
+        <p className="energy-card text-center text-xl p-8 animate-fade-in">
           <ClockIcon className="w-6 h-6 inline-block animate-spin mr-2" />
           Loading...
         </p>
       ) : myOnlyOffers.length === 0 ? (
-        <p className="text-center text-lg p-5 bg-green-700/50 rounded-lg">
+        <p className="energy-card text-center text-lg p-5 animate-fade-in">
           You have no active offers.
         </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
-          {myOnlyOffers.map((offer) => (
-            <OfferCard
+          {myOnlyOffers.map((offer, index) => (
+            <div
               key={offer.offer_id || offer._id}
-              offer={offer}
-              isOwnOffer={true}
-              handleCancelOffer={handleCancelOffer}
-              acceptNegotiation={acceptNegotiation}
-              cancelNegotiation={cancelNegotiation}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* MARKET OFFERS */}
-      <h2 className="font-bold text-2xl mb-3 text-white/90 text-center">
-        Market Offers Near You
-      </h2>
-
-      {loading ? (
-        <p className="text-center text-xl p-8 bg-green-700/50 rounded-lg">
-          <ClockIcon className="w-6 h-6 inline-block animate-spin mr-2" />
-          Loading...
-        </p>
-      ) : filteredMarketOffers.length === 0 ? (
-        <p className="text-center text-lg p-5 bg-green-700/50 rounded-lg">
-          No available offers in your transformer area.
-        </p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredMarketOffers.map((offer) => (
-            <OfferCard
-              key={offer.offer_id || offer._id}
-              offer={offer}
-              isOwnOffer={false}
-              handleCancelOffer={handleCancelOffer}
-              acceptNegotiation={acceptNegotiation}
-              cancelNegotiation={cancelNegotiation}
-            />
+              className="animate-fade-in-up"
+              style={{ animationDelay: `${(index + 3) * 0.1}s` }}
+            >
+              <OfferCard
+                offer={offer}
+                isOwnOffer={true}
+                handleCancelOffer={handleCancelOffer}
+                acceptNegotiation={acceptNegotiation}
+                cancelNegotiation={cancelNegotiation}
+              />
+            </div>
           ))}
         </div>
       )}

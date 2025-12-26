@@ -1,0 +1,78 @@
+/* Minimal Government Ledger Styles */
+
+.govt-ledger-table {
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.govt-ledger-table thead {
+    background: rgba(16, 185, 129, 0.1);
+    border-bottom: 2px solid var(--solar);
+}
+
+.govt-ledger-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--solar);
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+}
+
+.govt-ledger-table td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.govt-ledger-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.govt-ledger-table tbody tr:hover {
+    background: rgba(16, 185, 129, 0.05);
+    transform: translateX(4px);
+}
+
+.search-input {
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.skeleton {
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.05) 25%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0.05) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .govt-ledger-table {
+        font-size: 0.875rem;
+    }
+
+    .govt-ledger-table th,
+    .govt-ledger-table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .search-input {
+        width: 100%;
+    }
+}
