@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { sendOTP } = require("../utils/sendotp");
 
-const OTP_STORE = {}; // temporary in-memory OTP store { phone: { otp, expires } }
+const OTP_STORE = {}; // Backup for development mode only
 
 const authController = {
   // Step 1: Check device by phone
@@ -51,19 +51,25 @@ const authController = {
   async verifyOtp(req, res) {
     try {
       const { phone, otp } = req.body;
-      if (!phone || !otp) return res.status(400).json({ success: false, message: "Phone and OTP required" });
+      if (!phone || !otp) {
+        return res.status(400).json({
+          success: false,
+          message: "Phone and OTP required"
+        });
+      }
 
-      const record = OTP_STORE[phone];
-      if (!record) return res.status(400).json({ success: false, message: "OTP not sent" });
-      if (record.expires < Date.now()) return res.status(400).json({ success: false, message: "OTP expired" });
-      if (record.otp != otp) return res.status(400).json({ success: false, message: "Invalid OTP" });
+      // Verify OTP via Twilio Verify API
+      const result = await verifyOTP(phone, otp.toString());
 
       delete OTP_STORE[phone];
       console.log("OTP verified for phone:", phone);
       res.json({ success: true, message: "OTP verified" });
     } catch (err) {
-      console.error(err);
-      res.status(500).json({ success: false, message: "Server error" });
+      console.error('❌ Verify OTP error:', err);
+      res.status(500).json({
+        success: false,
+        message: "Server error during OTP verification"
+      });
     }
   },
 
@@ -124,8 +130,8 @@ const authController = {
         total_energy_bought:0 ,          // P2P bought (kWh)
         total_imported_energy:0 ,          // From meter
         total_exported_energy: 0,
-        last_import_reading: 0 ,          // Highest meter reading
-        last_export_reading:  0 ,
+        last_import_reading: 0,
+        last_export_reading: 0,
         last_login: new Date(),
         created_at: new Date()
       });
@@ -141,7 +147,8 @@ const authController = {
           email: newUser.email,
           phone: newUser.phone,
           meter_id: newUser.meter_id,
-          grid_id: newUser.grid_id
+          grid_id: newUser.grid_id,
+          device_linked: device ? true : false
         }
       });
 

@@ -6,7 +6,8 @@ const usercontroller = {
   // 1. Get user profile
   async getUserProfile (req, res) {
     try {
-      const user = await User.findById(req.user.user_id).select("-password");
+     // const user = await User.findById(req.user.user_id).select("-password");
+     const user = req.user; // password excluded in auth middleware
       if (!user) return res.status(404).json({ message: "User not found" });
 
       res.json({ success: true, data: user });
@@ -18,9 +19,11 @@ const usercontroller = {
   // 2. Change password
   async changePassword (req, res) {
     try {
+      console.log("Change password request received");
+      console.log("Request body:", req.body);
       const { currentPassword, newPassword } = req.body;
-
-      const user = await User.findById(req.user.user_id);
+      console.log("Current Password:", currentPassword ? "Provided" : "Not provided");
+      const user =req.user;
       console.log("Changing password for user:", req.user.user_id);
       const isMatch = await bcrypt.compare(currentPassword, user.password);
       if (!isMatch)

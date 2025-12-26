@@ -10,24 +10,18 @@ import {
 
 export default function NavigationBar({ active }) {
   const token = localStorage.getItem("token");
-<<<<<<< HEAD
-=======
   const location = useLocation();
->>>>>>> d18486908 (Add backend logic and frontend components)
 
   // Don't show navbar if not authenticated
   if (!token) {
     return null;
   }
 
-<<<<<<< HEAD
-=======
   // Don't show navbar on login or register pages
   if (location.pathname === "/login" || location.pathname === "/register" || location.pathname === "/") {
     return null;
   }
 
->>>>>>> d18486908 (Add backend logic and frontend components)
   const navItems = [
     { name: "Dashboard", icon: <HomeIcon className="w-6 h-6" />, route: "/dashboard" },
     { name: "Trade", icon: <ArrowPathIcon className="w-6 h-6" />, route: "/trade" },
@@ -41,15 +35,9 @@ export default function NavigationBar({ active }) {
         <Link
           key={item.name}
           to={item.route}
-<<<<<<< HEAD
-          className={`flex flex-col items-center gap-1 transition duration-300 p-2 rounded-xl cursor-pointer text-xs font-semibold
-            ${item.name === active
-              ? "text-solar bg-energy-subtle"
-=======
           className={`tab-button flex flex-col items-center gap-1 p-2 rounded-xl cursor-pointer text-xs font-semibold
             ${item.name === active
               ? "active text-solar bg-energy-subtle"
->>>>>>> d18486908 (Add backend logic and frontend components)
               : "text-gray-400 hover:text-energy"
             }
           `}

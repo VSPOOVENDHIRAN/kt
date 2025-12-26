@@ -217,15 +217,15 @@ exports.canceloffer = async (req, res) => {
 
     return res.json({ success: true, msg: "Offer cancelled and reservations released", offer });
 
-
   } catch (err) {
-    try { await session.abortTransaction(); } catch(_) {}
+    try { await session.abortTransaction(); } catch (_) { }
     session.endSession();
     console.error("cancelOffer error:", err);
     return res.status(500).json({ msg: "Server error" });
   }
 };
 
+//--accept offer function--
 exports.acceptoffer = async (req, res) => {
   const io = req.app.get("io");
   const session = await mongoose.startSession();
@@ -272,7 +272,7 @@ exports.acceptoffer = async (req, res) => {
 
    
     // -------------------------------
-    // 4. Fetch counterparty user
+    // 3. Fetch buyer user
     // -------------------------------
     //const buyer = await User.findOne({ user_id}).session(session);
 
@@ -286,7 +286,7 @@ exports.acceptoffer = async (req, res) => {
     }
 
     // -------------------------------------------------------
-    // 5. Process trade depending on SELL or BUY offer
+    // 4. Process trade
     // -------------------------------------------------------
     console.log("Processing trade for units:", unit);
 

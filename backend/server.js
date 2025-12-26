@@ -1,5 +1,12 @@
 // ---------------------- Load ENV Variables ----------------------
-require("dotenv").config({ path: "../.env" });
+require("dotenv").config(); // Load .env from current directory
+
+// DEBUG: Check if Twilio credentials are loaded
+console.log("=== ENVIRONMENT VARIABLES DEBUG ===");
+console.log("TWILIO_ACCOUNT_SID:", process.env.TWILIO_ACCOUNT_SID ? "✓ Loaded" : "❌ NOT FOUND");
+console.log("TWILIO_AUTH_TOKEN:", process.env.TWILIO_AUTH_TOKEN ? "✓ Loaded" : "❌ NOT FOUND");
+console.log("TWILIO_VERIFY_SERVICE_SID:", process.env.TWILIO_VERIFY_SERVICE_SID ? "✓ Loaded" : "❌ NOT FOUND");
+console.log("===================================");
 
 // ---------------------- Core Imports ----------------------
 const express = require("express");
