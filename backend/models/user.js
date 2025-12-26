@@ -14,17 +14,23 @@ const userSchema = new mongoose.Schema({
   meter_id: { type: String, required: true, index: true },  // Removed unique constraint for signup flexibility
   transformer_id: { type: String, required: true, trim: true },   // From sm_devices
   grid_id: { type: String, required: true },                     // Feeder/Area ID
-
+  wallet_address: { type: String, unique: true, sparse: true },        // Blockchain wallet address
   //-----------------------------------------------------------
   // WALLET
   //-----------------------------------------------------------
+<<<<<<< HEAD
   wallet_balance: { type: Number, default: 0 },
   energy_balance: { type: Number, default: 0 },
   token_balance: { type: Number, default: 0 },
+=======
+ // wallet_balance: { type: Number, default: 0 },
+  energy_balance: { type: Number, default: 0 }, 
+ // token_balance: { type: Number, default: 0 },
+>>>>>>> 972f4a3dc4952ab6cb7ba289b595ad5352207874
 
   // RESERVED (LOCKED) BALANCES
   reserved_energy: { type: Number, default: 0 }, // locked for sell offers
-  reserved_tokens: { type: Number, default: 0 }, // locked for buy offers
+//  reserved_tokens: { type: Number, default: 0 }, // locked for buy offers
 
   //-----------------------------------------------------------
   // ENERGY TRACKING (needed for future trade validation)
