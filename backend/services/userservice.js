@@ -1,5 +1,3 @@
-// 1. Import the necessary Mongoose Model
-// The path goes up one directory (../) from 'services' into 'models'.
 const User = require("../models/user"); 
 
 

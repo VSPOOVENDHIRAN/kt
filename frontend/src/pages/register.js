@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Register() {
-<<<<<<< HEAD
-=======
     // Multi-step registration state
     const [step, setStep] = useState(1); // 1: Phone, 2: OTP, 3: Email/Password, 4: Complete
     const [phoneNumber, setPhoneNumber] = useState("");
@@ -11,7 +9,6 @@ export default function Register() {
     const [deviceInfo, setDeviceInfo] = useState(null); // meter_id, gridid from backend
     const [isPhoneVerified, setIsPhoneVerified] = useState(false);
 
->>>>>>> d18486908 (Add backend logic and frontend components)
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -22,12 +19,9 @@ export default function Register() {
     });
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-<<<<<<< HEAD
-=======
     const [successMessage, setSuccessMessage] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
->>>>>>> d18486908 (Add backend logic and frontend components)
     const navigate = useNavigate();
 
     // Generate mock wallet address
@@ -40,8 +34,6 @@ export default function Register() {
         setFormData({ ...formData, walletAddress: address });
     };
 
-<<<<<<< HEAD
-=======
     // STEP 1: Send OTP (No device check for signup)
     const handlePhoneSubmit = async (e) => {
         e.preventDefault();
@@ -58,8 +50,8 @@ export default function Register() {
 
         try {
             // Send OTP directly without device validation (this is signup, not login)
-            console.log("[REGISTER] Calling API: http://localhost:5001/api/auth/send-otp");
-            const otpResponse = await fetch("http://localhost:5001/api/auth/send-otp", {
+            console.log("[REGISTER] Calling API: http://localhost:5001/api/auth/check-device");
+            const otpResponse = await fetch("http://localhost:5001/api/auth/check-device", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ phone: phoneNumber }),
@@ -127,20 +119,16 @@ export default function Register() {
     };
 
     // STEP 3 & 4: Register with email/password (only after OTP verification)
->>>>>>> d18486908 (Add backend logic and frontend components)
     const handleRegister = async (e) => {
         e.preventDefault();
         setError("");
 
-<<<<<<< HEAD
-=======
         // Security check: Block if phone not verified
         if (!isPhoneVerified) {
             setError("Phone number must be verified before registration.");
             return;
         }
 
->>>>>>> d18486908 (Add backend logic and frontend components)
         // Validation
         if (!formData.name || !formData.email || !formData.password) {
             setError("Please fill all required fields.");
@@ -157,8 +145,6 @@ export default function Register() {
             return;
         }
 
-<<<<<<< HEAD
-=======
         // Email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(formData.email)) {
@@ -166,7 +152,6 @@ export default function Register() {
             return;
         }
 
->>>>>>> d18486908 (Add backend logic and frontend components)
         setLoading(true);
 
         try {
@@ -177,10 +162,7 @@ export default function Register() {
                     name: formData.name,
                     email: formData.email,
                     password: formData.password,
-<<<<<<< HEAD
-=======
                     phone: phoneNumber, // Verified phone number
->>>>>>> d18486908 (Add backend logic and frontend components)
                     role: formData.role,
                     wallet_address: formData.walletAddress,
                 }),
@@ -188,20 +170,12 @@ export default function Register() {
 
             const data = await response.json();
 
-<<<<<<< HEAD
-            if (response.ok && data.success) {
-                // Registration successful - redirect to login
-                navigate("/login");
-            } else {
-                setError(data.message || "Registration failed. Please try again.");
-=======
             if (response.ok && data.message) {
                 // Registration successful - redirect to login
                 setSuccessMessage("Account created successfully! Redirecting to login...");
                 setTimeout(() => navigate("/login"), 2000);
             } else {
                 setError(data.error || data.message || "Registration failed. Please try again.");
->>>>>>> d18486908 (Add backend logic and frontend components)
             }
         } catch (err) {
             console.error("Registration error:", err);
@@ -211,10 +185,6 @@ export default function Register() {
         }
     };
 
-<<<<<<< HEAD
-    return (
-        <div className="flex items-center justify-center min-h-screen p-4">
-=======
     // Resend OTP
     const handleResendOtp = async () => {
         setError("");
@@ -245,7 +215,6 @@ export default function Register() {
 
     return (
         <div className="flex items-center justify-center min-h-screen p-4 pb-32">
->>>>>>> d18486908 (Add backend logic and frontend components)
             <div className="w-full max-w-md animate-fade-in-up">
                 {/* Logo/Brand Section */}
                 <div className="text-center mb-8">
@@ -271,122 +240,6 @@ export default function Register() {
                         </div>
                     )}
 
-<<<<<<< HEAD
-                    <form onSubmit={handleRegister} className="space-y-4">
-                        {/* Name */}
-                        <div className="space-y-2">
-                            <label className="data-label">Full Name *</label>
-                            <input
-                                type="text"
-                                placeholder="Enter your full name"
-                                className="input-energy"
-                                value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                disabled={loading}
-                            />
-                        </div>
-
-                        {/* Email */}
-                        <div className="space-y-2">
-                            <label className="data-label">Email Address *</label>
-                            <input
-                                type="email"
-                                placeholder="your.email@example.com"
-                                className="input-energy"
-                                value={formData.email}
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                disabled={loading}
-                            />
-                        </div>
-
-                        {/* Password */}
-                        <div className="space-y-2">
-                            <label className="data-label">Password *</label>
-                            <input
-                                type="password"
-                                placeholder="Minimum 6 characters"
-                                className="input-energy"
-                                value={formData.password}
-                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                disabled={loading}
-                            />
-                        </div>
-
-                        {/* Confirm Password */}
-                        <div className="space-y-2">
-                            <label className="data-label">Confirm Password *</label>
-                            <input
-                                type="password"
-                                placeholder="Re-enter password"
-                                className="input-energy"
-                                value={formData.confirmPassword}
-                                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                disabled={loading}
-                            />
-                        </div>
-
-                        {/* Role Selection */}
-                        <div className="space-y-2">
-                            <label className="data-label">Role *</label>
-                            <select
-                                className="input-energy"
-                                value={formData.role}
-                                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                disabled={loading}
-                            >
-                                <option value="buyer">Buyer (Purchase Energy)</option>
-                                <option value="seller">Seller (Sell Energy)</option>
-                                <option value="both">Both (Buy & Sell)</option>
-                            </select>
-                        </div>
-
-                        {/* Wallet Address */}
-                        <div className="space-y-2">
-                            <label className="data-label">Wallet Address (Optional)</label>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    placeholder="0x..."
-                                    className="input-energy flex-1 font-mono text-sm"
-                                    value={formData.walletAddress}
-                                    onChange={(e) => setFormData({ ...formData, walletAddress: e.target.value })}
-                                    disabled={loading}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={generateWalletAddress}
-                                    className="btn-solar px-4"
-                                    disabled={loading}
-                                >
-                                    Generate
-                                </button>
-                            </div>
-                            <p className="text-xs text-gray-500">
-                                Leave empty to generate automatically
-                            </p>
-                        </div>
-
-                        {/* Register Button */}
-                        <button
-                            type="submit"
-                            className={`btn-energy w-full ${loading ? "opacity-50 cursor-not-allowed" : ""
-                                }`}
-                            disabled={loading}
-                        >
-                            {loading ? (
-                                <span className="flex items-center justify-center gap-2">
-                                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Creating Account...
-                                </span>
-                            ) : (
-                                "Create Account"
-                            )}
-                        </button>
-                    </form>
-=======
                     {successMessage && (
                         <div className="bg-green-500/20 border border-green-500 text-green-200 p-4 rounded-lg text-center animate-fade-in">
                             {successMessage}
@@ -653,7 +506,6 @@ export default function Register() {
                             </button>
                         </form>
                     )}
->>>>>>> d18486908 (Add backend logic and frontend components)
 
                     {/* Divider */}
                     <div className="relative my-6">

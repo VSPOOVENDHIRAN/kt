@@ -6,7 +6,7 @@ const usercontroller = {
   // 1. Get user profile
   async getUserProfile (req, res) {
     try {
-     // const user = await User.findById(req.user.user_id).select("-password");
+     
      const user = req.user; // password excluded in auth middleware
       if (!user) return res.status(404).json({ message: "User not found" });
 

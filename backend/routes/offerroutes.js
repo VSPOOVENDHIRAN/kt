@@ -3,13 +3,8 @@ const router = express.Router();
 const offerController = require("../controllers/offercontroller");
 const authMiddleware = require("../middleware/auth");
 
-// ---------------------- Offer Routes ----------------------
-router.post("/create", offerController.createoffer);
-router.post("/negotiate", offerController.negotiateoffer);
-router.post("/cancel", offerController.canceloffer);
-router.post("/accept", offerController.acceptoffer);
-router.post("/cancelnegotiation", offerController.cancelnegotiation);
-router.get("/closed/30days", auth,offerController.getClosedOffersLast30Days);
-router.get("/current/own", auth, offerController.getOwnTradeOffers);
-router.get("/current", auth, offerController.getCurrentTradeOffers);
+router.post("/create", authMiddleware, offerController.createoffer);
+
+router.post("/cancel", authMiddleware, offerController.canceloffer);
+router.post("/accept", authMiddleware,offerController.acceptoffer);
 module.exports = router;

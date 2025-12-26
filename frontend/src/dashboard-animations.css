@@ -95,10 +95,10 @@
 .dashboard-icon {
     transition: color 250ms ease, background-color 250ms ease;
 }
-
+/*
 .dashboard-icon:hover {
     /* Color transitions handled by existing classes */
-}
+/*/**/
 
 /* 5️⃣ BUTTON INTERACTIONS - Button Lift / Press */
 .btn-energy,

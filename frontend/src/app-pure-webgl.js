@@ -9,12 +9,6 @@ import TradePage from "./pages/trade";
 // Professional Solar Energy WebGL background
 import SolarEnergyBackground from "./components/SolarEnergyBackground";
 import ProtectedRoute from "./components/ProtectedRoute";
-<<<<<<< HEAD
-
-function App() {
-    return (
-        <BrowserRouter>
-=======
 import PageTransition from "./components/PageTransition";
 import NavigationBar from "./components/navbar";
 import { useLocation } from "react-router-dom";
@@ -34,7 +28,6 @@ function AppContent() {
 
     return (
         <>
->>>>>>> d18486908 (Add backend logic and frontend components)
             <SolarEnergyBackground />
             <Routes>
                 {/* Public Routes */}
@@ -47,13 +40,9 @@ function AppContent() {
                     path="/dashboard"
                     element={
                         <ProtectedRoute>
-<<<<<<< HEAD
-                            <Dashboard />
-=======
                             <PageTransition>
                                 <Dashboard />
                             </PageTransition>
->>>>>>> d18486908 (Add backend logic and frontend components)
                         </ProtectedRoute>
                     }
                 />
@@ -61,13 +50,9 @@ function AppContent() {
                     path="/profile"
                     element={
                         <ProtectedRoute>
-<<<<<<< HEAD
-                            <Profile />
-=======
                             <PageTransition>
                                 <Profile />
                             </PageTransition>
->>>>>>> d18486908 (Add backend logic and frontend components)
                         </ProtectedRoute>
                     }
                 />
@@ -75,13 +60,9 @@ function AppContent() {
                     path="/history"
                     element={
                         <ProtectedRoute>
-<<<<<<< HEAD
-                            <History />
-=======
                             <PageTransition>
                                 <History />
                             </PageTransition>
->>>>>>> d18486908 (Add backend logic and frontend components)
                         </ProtectedRoute>
                     }
                 />
@@ -89,19 +70,13 @@ function AppContent() {
                     path="/trade"
                     element={
                         <ProtectedRoute>
-<<<<<<< HEAD
-                            <TradePage />
-=======
                             <PageTransition>
                                 <TradePage />
                             </PageTransition>
->>>>>>> d18486908 (Add backend logic and frontend components)
                         </ProtectedRoute>
                     }
                 />
             </Routes>
-<<<<<<< HEAD
-=======
             {/* Bottom Navigation - Always visible at app level */}
             <NavigationBar active={getActiveTab()} />
         </>
@@ -112,13 +87,8 @@ function App() {
     return (
         <BrowserRouter>
             <AppContent />
->>>>>>> d18486908 (Add backend logic and frontend components)
         </BrowserRouter>
     );
 }
 
 export default App;
-<<<<<<< HEAD
-=======
-
->>>>>>> d18486908 (Add backend logic and frontend components)

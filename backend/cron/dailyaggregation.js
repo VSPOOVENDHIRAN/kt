@@ -1,10 +1,6 @@
-
-// dailyaggregation.js
-
-// Import node-cron
 const cron = require("node-cron");
 
-// Import your MongoDB model
+
 const Reading = require("../models/reading"); // adjust path if needed
 
 // Schedule daily aggregation at 23:59

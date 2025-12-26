@@ -59,7 +59,6 @@ exports.get_accounts = async (req, res) => {
     }
 };
 
-// Get offer history for an account
 // type = "BUY" | "SELL"
 exports.get_offer_history = async (req, res) => {
     if (!web3) return res.status(400).json({ message: "Ganache not running" });
@@ -106,7 +105,6 @@ exports.get_balance = async (address) => {
         return res.status(400).json({ message: "Ganache not running" });
     }
 
-    //const address = req.body; //req.body.address;
     console.log("address:", address);
     if (!address) {
         return res.status(400).json({ message: "Address is required" });
@@ -188,7 +186,7 @@ exports.send_transaction = async ({ from, to, unit, amount }) => {
             logs: tx.logs
         };
 
-        // Sender (payer)
+      
 
  console.log("balances after tx fetched:", { from: await web3.eth.getBalance(from), to: await web3.eth.getBalance(to) });
 
@@ -235,10 +233,10 @@ function formatTx(tx) {
 //for testing purpose onlyconst mapUsersToGanacheAccounts = async () => {\
 const mapUsersToGanacheAccounts = async () => {
   try {
-    // Get Ganache accounts (ONLY 10 exist)
+    
     const accounts = await web3.eth.getAccounts();
 
-    // Fetch first 10 users (or less if DB has less)
+    
     const users = await User.find({})
       .sort({ createdAt: 1 })
       .limit(10);
@@ -250,7 +248,7 @@ const mapUsersToGanacheAccounts = async () => {
 
     // Map users to wallets
     for (let i = 0; i < users.length; i++) {
-      // Safety guard (in case users > wallets)
+
       if (!accounts[i]) break;
 
       users[i].wallet_address = accounts[i];
@@ -261,8 +259,43 @@ const mapUsersToGanacheAccounts = async () => {
       );
     }
 
-    console.log(`🎉 Successfully mapped ${users.length} user(s)`);
+    console.log(`Successfully mapped ${users.length} user(s)`);
   } catch (error) {
-    console.error("❌ Mapping failed:", error.message);
+    console.error(" Mapping failed:", error.message);
   }
+};
+
+
+///pooovuuuuu
+
+exports.history = async (req, res) => {
+    if (!web3) return res.status(400).json({ message: "Ganache not running" });
+
+    try {
+        const latestBlock = await web3.eth.getBlockNumber();
+        const history = [];
+
+        for (let i = 0; i <= latestBlock; i++) {
+            const block = await web3.eth.getBlock(i, true);
+            if (!block?.transactions) continue;
+
+            for (const tx of block.transactions) {
+                if (type === "BUY" && tx.from?.toLowerCase() === address)
+                    history.push(formatTx(tx));
+
+                if (type === "SELL" && tx.to?.toLowerCase() === address)
+                    history.push(formatTx(tx));
+            }
+        }
+
+        res.json({
+            address,
+            type,
+            total: history.length,
+            history,
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Error fetching history" });
+    }
 };

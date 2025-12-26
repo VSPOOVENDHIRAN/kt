@@ -11,6 +11,7 @@ router.get("/profile", authMiddleware, userController.getUserProfile);
 router.post("/change-password", authMiddleware, userController.changePassword);
 
 router.post("/verify-otp", authController.verifyOtp);
+router.post("/send-otp", authController.send_Otp);
 router.post("/register", authController.registerUser);
 router.post("/login", authController.login);
 

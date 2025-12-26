@@ -3,9 +3,6 @@ const router = express.Router();
 
 const Reading = require("../models/reading");
 
-// -------------------------------------------
-// Get Latest Reading for a Meter
-// -------------------------------------------
 router.get("/latest/:meter_id", async (req, res) => {
   try {
     const { meter_id } = req.params;
@@ -24,9 +21,6 @@ router.get("/latest/:meter_id", async (req, res) => {
   }
 });
 
-// -------------------------------------------
-// Get Reading History
-// -------------------------------------------
 router.get("/history/:meter_id", async (req, res) => {
   try {
     const { meter_id } = req.params;

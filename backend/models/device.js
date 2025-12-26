@@ -35,6 +35,4 @@ const smartMeterUserSchema = new mongoose.Schema({
     }
 }); // Note: No second argument, so { timestamps: true } is not included
 
-//const SmartMeterUser = mongoose.model('SmartMeterUser', smartMeterUserSchema);
-
 module.exports = mongoose.model("SmartMeterUser", smartMeterUserSchema,"sm_devices");

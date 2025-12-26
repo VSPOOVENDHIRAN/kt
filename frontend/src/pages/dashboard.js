@@ -8,34 +8,24 @@ import {
     ArrowTrendingUpIcon,
     ArrowTrendingDownIcon,
 } from "@heroicons/react/24/outline";
-<<<<<<< HEAD
-import NavigationBar from "../components/navbar.jsx";
-import LineChart from "../components/LineChart.jsx";
-=======
 
 import LineChart from "../components/LineChart.jsx";
 import { init3DCardTilt } from "../card-3d-tilt.js";
 
->>>>>>> d18486908 (Add backend logic and frontend components)
 
 export default function Dashboard() {
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
-<<<<<<< HEAD
-=======
     const [showBookIntro, setShowBookIntro] = useState(false);
     const [showLedgerModal, setShowLedgerModal] = useState(false);
     const [ledgerData, setLedgerData] = useState([]);
     const [ledgerLoading, setLedgerLoading] = useState(false);
     const [searchUserId, setSearchUserId] = useState("");
     const [filteredLedger, setFilteredLedger] = useState([]);
->>>>>>> d18486908 (Add backend logic and frontend components)
     const navigate = useNavigate();
 
     const token = localStorage.getItem("token");
 
-<<<<<<< HEAD
-=======
     // Check if book intro should play (only once ever)
     useEffect(() => {
         const hasSeenBookIntro = localStorage.getItem("dashboard_book_intro_seen");
@@ -49,7 +39,6 @@ export default function Dashboard() {
         }
     }, []);
 
->>>>>>> d18486908 (Add backend logic and frontend components)
     // Fetch user data
     useEffect(() => {
         const fetchData = async () => {
@@ -82,8 +71,6 @@ export default function Dashboard() {
         fetchData();
     }, [token, navigate]);
 
-<<<<<<< HEAD
-=======
     // Initialize 3D card tilt after dashboard loads
     useEffect(() => {
         if (userData) {
@@ -95,7 +82,6 @@ export default function Dashboard() {
         }
     }, [userData]);
 
->>>>>>> d18486908 (Add backend logic and frontend components)
     // Generate realistic chart data with logical trends
     const generateChartData = (type, days = 30) => {
         const data = [];
@@ -173,8 +159,6 @@ export default function Dashboard() {
         );
     }
 
-<<<<<<< HEAD
-=======
     // Open Ledger Modal
     const openLedger = async () => {
         setShowLedgerModal(true);
@@ -212,229 +196,14 @@ export default function Dashboard() {
         }
     };
 
->>>>>>> d18486908 (Add backend logic and frontend components)
     // Shorten wallet address
     const shortenAddress = (address) => {
+        console.log("Shortening address:", address);
         if (!address) return "N/A";
         return `${address.slice(0, 6)}...${address.slice(-4)}`;
     };
 
     return (
-<<<<<<< HEAD
-        <div className="min-h-screen p-6 pb-24 max-w-7xl mx-auto">
-            {/* Welcome Message - ONLY IN DASHBOARD */}
-            <div className="mb-6 animate-fade-in-up">
-                <h2 className="text-xl font-semibold text-gray-300">
-                    Welcome, <span className="text-solar">{userData.name || "User"}</span>
-                </h2>
-                <p className="text-gray-500 text-sm mt-1">
-                    Here's your energy trading overview
-                </p>
-            </div>
-
-            {/* Header */}
-            <div className="mb-8 animate-fade-in-up delay-100">
-                <h1 className="text-3xl font-bold mb-2">
-                    <span className="text-solar">Dash</span>
-                    <span className="text-energy">board</span>
-                </h1>
-            </div>
-
-            {/* User Info Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                {/* Wallet Address */}
-                <div className="energy-card energy-card-blockchain animate-fade-in-up delay-100">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                            <WalletIcon className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                            <p className="data-label text-xs">Wallet Address</p>
-                            <p className="text-sm font-mono text-blue-400">
-                                {shortenAddress(userData.user_id)}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Role */}
-                <div className="energy-card energy-card-solar animate-fade-in-up delay-200">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
-                            <UserIcon className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                            <p className="data-label text-xs">Role</p>
-                            <p className="text-sm font-semibold text-solar">
-                                Seller / Buyer
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Token Balance */}
-                <div className="energy-card animate-fade-in-up delay-300">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center">
-                            <CubeIcon className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                            <p className="data-label text-xs">Token Balance</p>
-                            <p className="data-value text-lg data-value-energy">
-                                {userData.token_balance}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Energy Balance */}
-                <div className="energy-card animate-fade-in-up delay-400 animate-pulse-subtle">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
-                            <BoltIcon className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                            <p className="data-label text-xs">Energy Balance</p>
-                            <p className="data-value text-lg data-value-solar">
-                                {userData.energy_balance} kWh
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Stats Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                {/* Total Sold */}
-                <div className="energy-card energy-card-solar animate-fade-in-up delay-500">
-                    <div className="flex items-center justify-between mb-4">
-                        <div>
-                            <p className="data-label">Total Energy Sold (30d)</p>
-                            <p className="data-value data-value-solar">{totalSold.toFixed(1)} kWh</p>
-                        </div>
-                        <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                            <ArrowTrendingUpIcon className="w-6 h-6 text-green-500" />
-                        </div>
-                    </div>
-                    <p className="text-sm text-gray-400">
-                        Avg: {(totalSold / 30).toFixed(1)} kWh/day
-                    </p>
-                </div>
-
-                {/* Total Bought */}
-                <div className="energy-card energy-card-blockchain animate-fade-in-up delay-600">
-                    <div className="flex items-center justify-between mb-4">
-                        <div>
-                            <p className="data-label">Total Energy Bought (30d)</p>
-                            <p className="data-value text-blue-400">{totalBought.toFixed(1)} kWh</p>
-                        </div>
-                        <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                            <ArrowTrendingDownIcon className="w-6 h-6 text-blue-500" />
-                        </div>
-                    </div>
-                    <p className="text-sm text-gray-400">
-                        Avg: {(totalBought / 30).toFixed(1)} kWh/day
-                    </p>
-                </div>
-
-                {/* Net Balance */}
-                <div className="energy-card animate-fade-in-up delay-700">
-                    <div className="flex items-center justify-between mb-4">
-                        <div>
-                            <p className="data-label">Net Energy (30d)</p>
-                            <p className={`data-value ${totalSold > totalBought ? 'text-energy' : 'text-blue-400'}`}>
-                                {(totalSold - totalBought).toFixed(1)} kWh
-                            </p>
-                        </div>
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${totalSold > totalBought ? 'bg-green-500/20' : 'bg-blue-500/20'
-                            }`}>
-                            <BoltIcon className={`w-6 h-6 ${totalSold > totalBought ? 'text-green-500' : 'text-blue-500'}`} />
-                        </div>
-                    </div>
-                    <p className="text-sm text-gray-400">
-                        {totalSold > totalBought ? 'Net Seller' : 'Net Buyer'}
-                    </p>
-                </div>
-            </div>
-
-            {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                {/* Energy Sold Chart */}
-                <div className="energy-card energy-card-solar animate-fade-in-up delay-800">
-                    <h3 className="chart-title flex items-center gap-2">
-                        <ArrowTrendingUpIcon className="w-5 h-5 text-solar" />
-                        Energy Sold (Last 30 Days)
-                    </h3>
-                    <div className="chart-container">
-                        <LineChart
-                            data={energySoldData}
-                            color="#10b981"
-                            label="kWh Sold"
-                            height={250}
-                        />
-                    </div>
-                </div>
-
-                {/* Energy Bought Chart */}
-                <div className="energy-card energy-card-blockchain animate-fade-in-up delay-900">
-                    <h3 className="chart-title flex items-center gap-2">
-                        <ArrowTrendingDownIcon className="w-5 h-5 text-blue-400" />
-                        Energy Bought (Last 30 Days)
-                    </h3>
-                    <div className="chart-container">
-                        <LineChart
-                            data={energyBoughtData}
-                            color="#3b82f6"
-                            label="kWh Bought"
-                            height={250}
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* Recent Activity */}
-            <div className="energy-card animate-fade-in-up delay-1000">
-                <h3 className="text-xl font-bold mb-4">Recent Activity</h3>
-                <div className="space-y-3">
-                    {[
-                        { type: 'sell', amount: '45 kWh', tokens: '135', time: '2 hours ago', status: 'completed' },
-                        { type: 'buy', amount: '30 kWh', tokens: '90', time: '5 hours ago', status: 'completed' },
-                        { type: 'sell', amount: '60 kWh', tokens: '180', time: '1 day ago', status: 'completed' },
-                    ].map((activity, i) => (
-                        <div
-                            key={i}
-                            className="flex items-center justify-between p-4 bg-energy-subtle rounded-lg border border-energy"
-                        >
-                            <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${activity.type === 'sell' ? 'bg-green-500/20' : 'bg-blue-500/20'
-                                    }`}>
-                                    {activity.type === 'sell' ? (
-                                        <ArrowTrendingUpIcon className="w-5 h-5 text-green-500" />
-                                    ) : (
-                                        <ArrowTrendingDownIcon className="w-5 h-5 text-blue-500" />
-                                    )}
-                                </div>
-                                <div>
-                                    <p className="font-semibold">
-                                        {activity.type === 'sell' ? 'Sold' : 'Bought'} {activity.amount}
-                                    </p>
-                                    <p className="text-sm text-gray-400">{activity.time}</p>
-                                </div>
-                            </div>
-                            <div className="text-right">
-                                <p className="font-semibold text-solar">{activity.tokens} Tokens</p>
-                                <span className="status-badge status-completed text-xs">
-                                    {activity.status}
-                                </span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            <NavigationBar active="Dashboard" />
-        </div>
-=======
         <>
             {/* ONE-TIME 3D BOOK INTRO ANIMATION */}
             {showBookIntro && (
@@ -547,7 +316,7 @@ export default function Dashboard() {
                             <div>
                                 <p className="data-label text-xs">Wallet Address</p>
                                 <p className="text-sm font-mono text-blue-400">
-                                    {shortenAddress(userData.user_id)}
+                                    {shortenAddress(userData.wallet_address)}
                                 </p>
                             </div>
                         </div>
@@ -821,6 +590,5 @@ export default function Dashboard() {
                 </div>
             )}
         </>
->>>>>>> d18486908 (Add backend logic and frontend components)
     );
 }

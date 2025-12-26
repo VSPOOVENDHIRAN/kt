@@ -12,21 +12,6 @@ async function generateOfferId() {
 
 const N = v => (typeof v === "number" ? v : Number(v || 0));
 
-// -----------------------------
-// CREATE OFFER.
-// ------------------------------
-/*
-const Web3 = require("web3");
-const User = require("../models/user");
-const Offer = require("../models/Offer");
-const { generateOfferId } = require("../utils/helpers");
-const ERC20_ABI = require("../abi/ERC20.json"); // Your ERC-20 ABI
-const TOKEN_ADDRESS = "0xYourTokenContractAddress"; // Replace with your token contract address
-
-// Initialize Web3 (Ganache or any testnet)
-const web3 = new Web3("http://127.0.0.1:8545"); // Replace with your provider
-*/
-// Internal helper: get ERC-20 token balance
 
 const getTokenBalance = async (wallet_address) => {
   if (!wallet_address) throw new Error("Wallet address required");
@@ -41,28 +26,29 @@ exports.createoffer = async (req, res) => {
   const session = await mongoose.startSession();
 
   try {
+    console.log("Create offer request body:", req.body);
     session.startTransaction();
 
     // Destructure request body
-    const { user, units, token_per_unit } = req.body;
-
+    const { user_id, units, token_per_unit } = req.body;
+    console.log("Creating offer for user:", user_id, "Units:", units, "Token/Unit:", token_per_unit);
     // Validate required fields
-    if (!user || !units || !token_per_unit) {
+    if (!user_id || !units || !token_per_unit) {
       await session.abortTransaction();
       session.endSession();
       return res.status(400).json({ msg: "Missing fields: user, units, token_per_unit are required" });
     }
-
-/*    // Find creator in DB
-    const creator = await User.findOne({ user_id: user }).session(session);
-    if (!creator) {
+    const user = await User.findOne({ user_id }).session(session);
+    if (!user) {
+      console.log("User not found:", user_id);  
       await session.abortTransaction();
       session.endSession();
-      return res.status(404).json({ msg: "Creator not found" });
-    }*/
-
-    // Save wallet address if missing
-    if (!user.wallet_address) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+      const wallet_address = user.wallet_address;
+    // Fetch user from DB
+   
+    if (wallet_address) {
       console.log("Fetching wallet address for creator:", user.user_id);
       user.wallet_address = wallet_address;
       await user.save({ session });
@@ -72,9 +58,7 @@ exports.createoffer = async (req, res) => {
     const tokenPerUnit = Number(token_per_unit);
     const totalTokens = unitsNum * tokenPerUnit;
 
-    // -----------------------------
     // SELL OFFER: check energy balance
-    // -----------------------------
     
       if (Number(user.energy_balance) < unitsNum) {
         await session.abortTransaction();
@@ -84,10 +68,9 @@ exports.createoffer = async (req, res) => {
 
       user.energy_balance -= unitsNum;
       user.reserved_energy += unitsNum;
+
+    // Create offer object
     
-    // -----------------------------
-    // Create new offer
-    // -----------------------------
     const offer = new Offer({
       offer_id: await generateOfferId(),
       creator_id: user.user_id,
@@ -106,9 +89,9 @@ exports.createoffer = async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
-    // -----------------------------
+ 
     // Notify nearby users in real-time
-    // -----------------------------
+   
     const sameTransformerUsers = await User.find({
       transformer_id: user.transformer_id
     }).select("user_id");
@@ -129,14 +112,6 @@ exports.createoffer = async (req, res) => {
   }
 };
 
-
-///---negotiate offer function can be added here---
-
-
-//--cancel negotiation function can be added here--
-
-
-//--cancel offer function can be added here--
 
 exports.canceloffer = async (req, res) => {
   const io = req.app.get("io");
@@ -186,16 +161,13 @@ exports.canceloffer = async (req, res) => {
        console.log("Creator not found");
       await session.abortTransaction(); session.endSession(); return res.status(404).json({ msg: "Creator not found" }); }
     
-    // Release creator reserved portion
-   
+  
       // restore seller reserved energy
       console.log("Restoring reserved energy to creator");
       creator.reserved_energy = Math.max(0, N(creator.reserved_energy) - N(offer.remaining_units));
       
       creator.energy_balance = N(creator.energy_balance) + N(offer.units);
       console.log("Creator energy balance after restore:", creator.energy_balance);
-    
-    // If negotiator exists, refund their reservation
    
 
     offer.status = "cancelled";
@@ -234,11 +206,8 @@ exports.acceptoffer = async (req, res) => {
   try {
     const { offer_id ,user ,unit } = req.body;
 
-    //const user_id = req.user.user_id;
-
-    // -------------------------------
     // 1. Find Offer
-    // -------------------------------
+   
     const offer = await Offer.findOne({ offer_id }).session(session);
 
     if (!offer) {
@@ -252,9 +221,9 @@ exports.acceptoffer = async (req, res) => {
     }
 
     console.log("Offer is open for acceptance");
-    // -------------------------------
+  
     // 2. Creator of Offer
-    // -------------------------------
+   
     const creator = await User.findOne({ user_id: offer.creator_id }).session(session);
 
     if (!creator) {
@@ -270,11 +239,7 @@ exports.acceptoffer = async (req, res) => {
     }
       
 
-   
-    // -------------------------------
     // 3. Fetch buyer user
-    // -------------------------------
-    //const buyer = await User.findOne({ user_id}).session(session);
 
     console.log("Buyer found:", user.user_id);
     console.log("Buyer wallet address:", user.wallet_address);
@@ -285,9 +250,8 @@ exports.acceptoffer = async (req, res) => {
       return res.status(404).json({ msg: "Counterparty not found" });
     }
 
-    // -------------------------------------------------------
     // 4. Process trade
-    // -------------------------------------------------------
+  
     console.log("Processing trade for units:", unit);
 
     const remaining_units = offer.remaining_units;
@@ -299,10 +263,9 @@ exports.acceptoffer = async (req, res) => {
 
 
 
-    const needed_token =unit*offer.token_per_unit; // The ORIGINAL price before negotiation
+    const needed_token =unit*offer.token_per_unit; 
    console.log("Tokens needed for trade:", needed_token);
 
-    // Seller receives tokens
     
         console.log("Processing SELL offer acceptance");
     // Seller gives energy
@@ -326,12 +289,13 @@ exports.acceptoffer = async (req, res) => {
         return res.status(400).json({ msg: "Buyer does not have enough token balance" });
     }
     console.log("Buyer has sufficient token balance:", balance_buyer);
-const tx = await send_transaction({
-  from: user.wallet_address,
-  to: creator.wallet_address,
-  amount: needed_token,
-  unit:unit
-});  
+
+     const tx = await send_transaction({
+     from: user.wallet_address,
+     to: creator.wallet_address,
+     amount: needed_token,
+     unit:unit
+    });  
 
    console.log("check");
 
@@ -356,9 +320,8 @@ const tx = await send_transaction({
       offer.completed_at = new Date();
     }
 
-    // =======================================================
     // 7. Save and Commit
-    // =======================================================
+
     await creator.save({ session });
     //await counter.save({ session });
     await offer.save({ session });
@@ -389,6 +352,3 @@ const tx = await send_transaction({
     return res.status(500).json({ msg: "Server error", error: err.message });
   }
 };
-
-
-// Fetch closed offers from last 20 days for the same transformer as the requesterbackend/controllers/offercontroller.js
