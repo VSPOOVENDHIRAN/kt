@@ -3,6 +3,7 @@ const router = express.Router();
 const govController = require("../controllers/govcontroller");
 const auth = require("../middleware/auth");
 
+router.get("/ledger", auth, govController.getGovLedger);
 router.get("/eb-bills", auth, govController.getAllEBBills);
 router.get("/eb-bills/:user_id", auth, govController.getUserEBBill);
 

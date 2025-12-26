@@ -26,7 +26,7 @@ exports.start_ganache = async (req, res) => {
 
     // Attach web3 to the Ganache provider
     web3 = new Web3(ganacheProvider);
-     await mapUsersToGanacheAccounts(); // For testing: map users to ganache accounts
+    await mapUsersToGanacheAccounts(); // For testing: map users to ganache accounts
     console.log("✅ Ganache started in-process");
     res.json({ message: "Ganache started" });
 };
@@ -48,7 +48,7 @@ exports.get_accounts = async (req, res) => {
                 balanceETH: web3.utils.fromWei(info.balance.toString(), "ether"),
             });
         }
-     //   console.log("accounts data going to print");
+        //   console.log("accounts data going to print");
         res.json({
             total: result.length,
             accounts: result,
@@ -117,8 +117,8 @@ exports.get_balance = async (address) => {
     try {
         const balanceWei = await web3.eth.getBalance(address);
         const balanceETH = web3.utils.fromWei(balanceWei, "ether");
-         console.log("Balance fetched:", { address, balanceETH });
-        return{
+        console.log("Balance fetched:", { address, balanceETH });
+        return {
             address,
             balanceWei: balanceWei.toString(),
             balanceETH
@@ -130,15 +130,15 @@ exports.get_balance = async (address) => {
             error: err.message
         });
     }
-}; 
+};
 
 exports.send_transaction = async ({ from, to, unit, amount }) => {
     if (!web3) return res.status(400).json({ message: "Ganache not running" });
-     console.log("Initiating transaction:", { from, to, unit, amount });
-   // const { from, to, amount, unit } = req.body;
+    console.log("Initiating transaction:", { from, to, unit, amount });
+    // const { from, to, amount, unit } = req.body;
     if (!from || !to || !amount || !unit)
         return res.status(400).json({ message: "Required fields: from, to, amount (ETH)" });
-    
+
     console.log("Sending transaction from", from, "to", to, "amount (ETH):", amount, "unit:", unit);
     try {
         // 1️⃣ Get sender balance
@@ -172,7 +172,7 @@ exports.send_transaction = async ({ from, to, unit, amount }) => {
             gasPrice
         });
 
-        console.log("Transaction successful. Hash:", tx.transactionHash);   
+        console.log("Transaction successful. Hash:", tx.transactionHash);
 
         // 4️⃣ Convert BigInt fields to strings
         const txResponse = {
@@ -190,9 +190,9 @@ exports.send_transaction = async ({ from, to, unit, amount }) => {
 
         // Sender (payer)
 
- console.log("balances after tx fetched:", { from: await web3.eth.getBalance(from), to: await web3.eth.getBalance(to) });
+        console.log("balances after tx fetched:", { from: await web3.eth.getBalance(from), to: await web3.eth.getBalance(to) });
 
-        return{
+        return {
             message: "Transaction successful",
             transaction: txResponse
         };
@@ -234,22 +234,22 @@ function formatTx(tx) {
 
 //for testing purpose only
 const mapUsersToGanacheAccounts = async () => {
- 
-  const accounts = await web3.eth.getAccounts();
- const user1 = await User.findOne({ user_id: "USR1001" });
+
+    const accounts = await web3.eth.getAccounts();
+    const user1 = await User.findOne({ user_id: "USR1001" });
     if (user1) {
-      user1.wallet_address = accounts[0]; // matches your schema
-      await user1.save();
+        user1.wallet_address = accounts[0]; // matches your schema
+        await user1.save();
     }
 
     // Map second user
     const user2 = await User.findOne({ user_id: "USR1002" });
     if (user2) {
-      user2.wallet_address = accounts[1];
-      await user2.save();
+        user2.wallet_address = accounts[1];
+        await user2.save();
     }
 
     console.log("✅ Users mapped to Ganache accounts successfully");
-  //await user2.save();
-  
+    //await user2.save();
+
 };

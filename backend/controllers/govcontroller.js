@@ -109,3 +109,47 @@ exports.getUserEBBill = async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error" });
     }
 };
+
+// Get government ledger data (for frontend Gov Ledger page)
+exports.getGovLedger = async (req, res) => {
+    try {
+        const { search } = req.query;
+
+        let query = {};
+        if (search) {
+            query.user_id = { $regex: search, $options: 'i' };
+        }
+
+        const ledgerData = await GovLedger.find(query)
+            .sort({ timestamp: -1 });
+
+        // Group by user_id and calculate monthly totals
+        const userMap = {};
+
+        for (const record of ledgerData) {
+            if (!userMap[record.user_id]) {
+                userMap[record.user_id] = {
+                    user_id: record.user_id,
+                    monthly_units: 0,
+                    monthly_bill: 0
+                };
+            }
+
+            userMap[record.user_id].monthly_units += record.energy_kwh || 0;
+            userMap[record.user_id].monthly_bill += record.amount_inr || 0;
+        }
+
+        const users = Object.values(userMap);
+
+        return res.json({
+            success: true,
+            data: {
+                total_users: users.length,
+                users: users
+            }
+        });
+    } catch (err) {
+        console.error("getGovLedger error:", err);
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+};
