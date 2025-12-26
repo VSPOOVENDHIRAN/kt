@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Intro Animation Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f172a;
+            color: #f1f5f9;
+            overflow: hidden;
+        }
+
+        /* Animation Container */
+        .dashboard-intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #0f172a;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1500px;
+        }
+
+        /* The Book Container */
+        .intro-book {
+            position: absolute;
+            width: 300px;
+            height: 400px;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border: 2px solid #10b981;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            transform-style: preserve-3d;
+            animation: bookRotation 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* PHASE 1: Book Rotation */
+        @keyframes bookRotation {
+            0% {
+                transform: rotateY(0deg) rotateX(0deg) scale(0.8);
+                opacity: 0;
+            }
+
+            30% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: rotateY(15deg) rotateX(-10deg) scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Dashboard Pages */
+        .dashboard-page {
+            position: fixed;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 1.5rem;
+            opacity: 0;
+            transform-origin: center center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            width: 200px;
+            height: 150px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        .dashboard-page-1 {
+            animation: pageRelease 2.5s 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            --scatter-x: -25vw;
+            --scatter-y: -20vh;
+            --scatter-rotate: -15deg;
+        }
+
+        .dashboard-page-2 {
+            animation: pageRelease 2.5s 1.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            --scatter-x: 25vw;
+            --scatter-y: -20vh;
+            --scatter-rotate: 15deg;
+        }
+
+        .dashboard-page-3 {
+            animation: pageRelease 2.5s 1.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            --scatter-x: -30vw;
+            --scatter-y: 10vh;
+            --scatter-rotate: -20deg;
+        }
+
+        .dashboard-page-4 {
+            animation: pageRelease 2.5s 1.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            --scatter-x: 30vw;
+            --scatter-y: 10vh;
+            --scatter-rotate: 20deg;
+        }
+
+        .dashboard-page-5 {
+            animation: pageRelease 2.5s 1.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            --scatter-x: 0vw;
+            --scatter-y: 25vh;
+            --scatter-rotate: 5deg;
+        }
+
+        .dashboard-page-6 {
+            animation: pageRelease 2.5s 2.0s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            --scatter-x: -20vw;
+            --scatter-y: -10vh;
+            --scatter-rotate: -10deg;
+        }
+
+        @keyframes pageRelease {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.3) rotate(0deg);
+            }
+
+            20% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
+            }
+
+            50% {
+                opacity: 1;
+                transform: translate(calc(-50% + var(--scatter-x)), calc(-50% + var(--scatter-y))) scale(0.8) rotate(var(--scatter-rotate));
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(calc(-50% + var(--scatter-x)), calc(-50% + var(--scatter-y))) scale(0.9) rotate(var(--scatter-rotate));
+            }
+        }
+
+        /* Book Fade Out */
+        .intro-book {
+            animation: bookRotation 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+                bookFadeOut 0.8s 3.5s ease-out forwards;
+        }
+
+        @keyframes bookFadeOut {
+            0% {
+                opacity: 1;
+                transform: rotateY(15deg) rotateX(-10deg) scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: rotateY(15deg) rotateX(-10deg) scale(0.8);
+            }
+        }
+
+        /* Dashboard Content */
+        .dashboard-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            animation: dashboardSettle 1s 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            opacity: 0;
+        }
+
+        @keyframes dashboardSettle {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.95);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .dashboard-content h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .dashboard-content p {
+            font-size: 1.2rem;
+            color: #94a3b8;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #fbbf24 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Overlay Fade Out */
+        .dashboard-intro-overlay {
+            animation: overlayFadeOut 0.5s 4.5s ease-out forwards;
+        }
+
+        @keyframes overlayFadeOut {
+            0% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+                pointer-events: none;
+            }
+        }
+
+        .replay-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #10b981 0%, #065f46 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 10000;
+            transition: transform 0.2s;
+        }
+
+        .replay-btn:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Intro Animation Overlay -->
+    <div class="dashboard-intro-overlay" id="introOverlay">
+        <!-- The Book Container -->
+        <div class="intro-book"></div>
+
+        <!-- Dashboard Pages that Release and Scatter -->
+        <div class="dashboard-page dashboard-page-1">
+            <div class="icon-box" style="background: #3b82f6;">💼</div>
+        </div>
+
+        <div class="dashboard-page dashboard-page-2">
+            <div class="icon-box" style="background: #fbbf24;">👤</div>
+        </div>
+
+        <div class="dashboard-page dashboard-page-3">
+            <div class="icon-box" style="background: #10b981;">🔷</div>
+        </div>
+
+        <div class="dashboard-page dashboard-page-4">
+            <div class="icon-box" style="background: #f59e0b;">⚡</div>
+        </div>
+
+        <div class="dashboard-page dashboard-page-5">
+            <div class="icon-box" style="background: #22c55e;">📈</div>
+        </div>
+
+        <div class="dashboard-page dashboard-page-6">
+            <div class="icon-box" style="background: #3b82f6;">📉</div>
+        </div>
+    </div>
+
+    <!-- Dashboard Content (Settles In) -->
+    <div class="dashboard-content">
+        <h1 class="gradient-text">Dashboard</h1>
+        <p>Your energy trading overview</p>
+    </div>
+
+    <!-- Replay Button -->
+    <button class="replay-btn" onclick="location.reload()">Replay Animation</button>
+</body>
+
+</html>

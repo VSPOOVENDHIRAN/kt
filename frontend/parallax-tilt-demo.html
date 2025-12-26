@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetaMask-Style Parallax Tilt Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f172a;
+            color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            color: #10b981;
+        }
+
+        .instructions {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+
+        /* Parallax Tilt Container */
+        .parallax-tilt-container {
+            transform-style: preserve-3d;
+            will-change: transform;
+            cursor: pointer;
+            transition: transform 400ms cubic-bezier(0.03, 0.98, 0.52, 0.99);
+        }
+
+        /* Hero Card */
+        .dashboard-hero-card {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border: 1px solid #10b981;
+            border-radius: 16px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Background gradient effect */
+        .dashboard-hero-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center,
+                    rgba(16, 185, 129, 0.15) 0%,
+                    transparent 50%);
+            opacity: 0;
+            transition: opacity 400ms ease;
+            pointer-events: none;
+        }
+
+        .parallax-tilt-container:hover .dashboard-hero-card::before {
+            opacity: 1;
+        }
+
+        /* Layered depth */
+        .parallax-layer-1 {
+            transform: translateZ(20px);
+            transform-style: preserve-3d;
+        }
+
+        .parallax-layer-2 {
+            transform: translateZ(40px);
+            transform-style: preserve-3d;
+        }
+
+        .parallax-layer-3 {
+            transform: translateZ(60px);
+            transform-style: preserve-3d;
+        }
+
+        /* Icon container */
+        .hero-icon-container {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10b981 0%, #065f46 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+            margin-bottom: 1.5rem;
+            font-size: 2.5rem;
+        }
+
+        /* Title */
+        .hero-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fbbf24 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-subtitle {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Stats grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .hero-stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 0.25rem;
+        }
+
+        .hero-stat-label {
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+
+        /* Glow effect on hover */
+        .parallax-tilt-container:hover .dashboard-hero-card {
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.3),
+                0 0 40px rgba(16, 185, 129, 0.15);
+        }
+
+        .info {
+            text-align: center;
+            margin-top: 2rem;
+            color: #64748b;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="title">MetaMask-Style Parallax Tilt</h1>
+        <p class="instructions">
+            Move your mouse over the card to see the 3D parallax tilt effect
+        </p>
+
+        <div class="parallax-tilt-container" id="tiltCard">
+            <div class="dashboard-hero-card">
+                <!-- Layer 1 - Icon -->
+                <div class="parallax-layer-1 hero-icon-container">
+                    ⚡
+                </div>
+
+                <!-- Layer 2 - Title -->
+                <div class="parallax-layer-2">
+                    <h2 class="hero-title">Energy Trading Hub</h2>
+                    <p class="hero-subtitle">
+                        Real-time blockchain-powered energy marketplace
+                    </p>
+                </div>
+
+                <!-- Layer 3 - Stats -->
+                <div class="parallax-layer-3 stats-grid">
+                    <div>
+                        <p class="hero-stat-value">1,250</p>
+                        <p class="hero-stat-label">kWh Available</p>
+                    </div>
+                    <div>
+                        <p class="hero-stat-value" style="color: #fbbf24;">3,750</p>
+                        <p class="hero-stat-label">Tokens</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p class="info">
+            Max tilt: 4° | Perspective: 1200px | Smooth easing with cubic-bezier
+        </p>
+    </div>
+
+    <script>
+        const tiltCard = document.getElementById('tiltCard');
+        const maxTilt = 4;
+        const perspective = 1200;
+        const scale = 1.02;
+
+        tiltCard.addEventListener('mousemove', (e) => {
+            const rect = tiltCard.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            // Calculate rotation based on mouse position
+            const rotateX = ((y - centerY) / centerY) * -maxTilt;
+            const rotateY = ((x - centerX) / centerX) * maxTilt;
+
+            tiltCard.style.transform = `
+                perspective(${perspective}px)
+                rotateX(${rotateX}deg)
+                rotateY(${rotateY}deg)
+                scale3d(${scale}, ${scale}, ${scale})
+            `;
+        });
+
+        tiltCard.addEventListener('mouseleave', () => {
+            tiltCard.style.transform = `
+                perspective(${perspective}px)
+                rotateX(0deg)
+                rotateY(0deg)
+                scale3d(1, 1, 1)
+            `;
+        });
+    </script>
+</body>
+
+</html>

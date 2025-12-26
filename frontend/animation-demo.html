@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetaMask-Style Animation Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            overflow-x: hidden;
+            background: #000;
+        }
+
+        #animationCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            padding: 1rem;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3), transparent);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .header h2 {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .header .user {
+            color: #d8b4fe;
+            filter: drop-shadow(0 0 10px rgba(168,85,247,0.5));
+        }
+
+        .header p {
+            color: #d1d5db;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .card h1 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: #1f2937;
+        }
+
+        .card p {
+            color: #4b5563;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .info-box {
+            background: #f3f4f6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            border-left: 4px solid #8b5cf6;
+        }
+
+        .info-box h3 {
+            color: #8b5cf6;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box ul {
+            list-style: none;
+            color: #4b5563;
+            font-size: 0.875rem;
+        }
+
+        .info-box li {
+            padding: 0.25rem 0;
+        }
+
+        .info-box li:before {
+            content: "✓ ";
+            color: #8b5cf6;
+            font-weight: bold;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="animationCanvas"></canvas>
+
+    <div class="header">
+        <div style="max-width: 1280px; margin: 0 auto;">
+            <h2>Welcome, <span class="user">User</span></h2>
+            <p>This is a temporary placeholder until the dashboard is implemented.</p>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="card">
+            <h1>🎨 MetaMask-Style Animation</h1>
+            <p>
+                Your frontend now features a <strong>premium WebGL animated background</strong> 
+                inspired by MetaMask's organic, flowing aesthetic.
+            </p>
+            <p>
+                The animation runs in a fullscreen canvas behind all UI elements using 
+                <strong>pure WebGL with GLSL shaders</strong>.
+            </p>
+
+            <div class="info-box">
+                <h3>✨ Features</h3>
+                <ul>
+                    <li>Multi-octave noise (FBM) for organic patterns</li>
+                    <li>Domain warping for fluid movement</li>
+                    <li>Premium MetaMask-inspired colors</li>
+                    <li>Animated glow and vignette effects</li>
+                    <li>Smooth 60 FPS performance</li>
+                    <li>No external dependencies</li>
+                </ul>
+            </div>
+
+            <div class="info-box" style="border-left-color: #3b82f6; margin-top: 1rem;">
+                <h3 style="color: #3b82f6;">🚀 Integration</h3>
+                <ul>
+                    <li>Already integrated in your React app</li>
+                    <li>Works on all pages automatically</li>
+                    <li>UI remains fully interactive</li>
+                    <li>No changes to existing functionality</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // WebGL Animation Script
+        const canvas = document.getElementById('animationCanvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+        if (!gl) {
+            console.warn('WebGL not supported');
+        } else {
+            // Set canvas size
+            const resize = () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                gl.viewport(0, 0, canvas.width, canvas.height);
+            };
+            resize();
+            window.addEventListener('resize', resize);
+
+            // Vertex shader
+            const vertexShaderSource = `
+                attribute vec2 position;
+                void main() {
+                    gl_Position = vec4(position, 0.0, 1.0);
+                }
+            `;
+
+            // Enhanced Fragment shader with premium MetaMask-style organic animation
+            const fragmentShaderSource = `
+                precision highp float;
+                uniform float uTime;
+                uniform vec2 uResolution;
+
+                // Simplex noise functions
+                vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
+
+                float snoise(vec2 v) {
+                    const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
+                    vec2 i  = floor(v + dot(v, C.yy));
+                    vec2 x0 = v - i + dot(i, C.xx);
+                    vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+                    vec4 x12 = x0.xyxy + C.xxzz;
+                    x12.xy -= i1;
+                    i = mod289(i);
+                    vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0)) + i.x + vec3(0.0, i1.x, 1.0));
+                    vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+                    m = m*m;
+                    m = m*m;
+                    vec3 x = 2.0 * fract(p * C.www) - 1.0;
+                    vec3 h = abs(x) - 0.5;
+                    vec3 ox = floor(x + 0.5);
+                    vec3 a0 = x - ox;
+                    m *= 1.79284291400159 - 0.85373472095314 * (a0*a0 + h*h);
+                    vec3 g;
+                    g.x  = a0.x  * x0.x  + h.x  * x0.y;
+                    g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+                    return 130.0 * dot(m, g);
+                }
+
+                // Multi-octave noise for richer organic patterns
+                float fbm(vec2 p, float time) {
+                    float value = 0.0;
+                    float amplitude = 0.5;
+                    float frequency = 1.0;
+                    
+                    for(int i = 0; i < 4; i++) {
+                        value += amplitude * snoise(p * frequency + time * 0.1);
+                        frequency *= 2.0;
+                        amplitude *= 0.5;
+                    }
+                    return value;
+                }
+
+                void main() {
+                    vec2 uv = gl_FragCoord.xy / uResolution;
+                    vec2 p = (gl_FragCoord.xy * 2.0 - uResolution) / min(uResolution.x, uResolution.y);
+                    
+                    float t = uTime * 0.05;
+                    
+                    // Create flowing organic patterns with multiple layers
+                    vec2 warp1 = vec2(
+                        fbm(p * 1.2 + vec2(t * 0.3, t * 0.2), t),
+                        fbm(p * 1.2 + vec2(t * 0.2, -t * 0.3), t)
+                    );
+                    
+                    vec2 warp2 = vec2(
+                        fbm(p * 0.8 + warp1 * 0.5 + vec2(-t * 0.15, t * 0.25), t * 1.1),
+                        fbm(p * 0.8 + warp1 * 0.5 + vec2(t * 0.25, t * 0.15), t * 1.1)
+                    );
+                    
+                    // Final warped position
+                    vec2 warpedP = p + warp1 * 0.3 + warp2 * 0.2;
+                    
+                    // Multiple noise layers at different scales and speeds
+                    float noise1 = snoise(warpedP * 1.5 + vec2(t * 0.4, t * 0.3));
+                    float noise2 = snoise(warpedP * 2.2 - vec2(t * 0.25, -t * 0.35));
+                    float noise3 = snoise(warpedP * 0.9 + vec2(-t * 0.2, t * 0.15));
+                    float noise4 = snoise(warpedP * 3.0 + vec2(t * 0.5, -t * 0.4));
+                    
+                    // Combine noise with different weights for depth
+                    float combinedNoise = noise1 * 0.4 + noise2 * 0.3 + noise3 * 0.2 + noise4 * 0.1;
+                    
+                    // Premium MetaMask-inspired color palette
+                    vec3 deepPurple = vec3(0.35, 0.15, 0.75);
+                    vec3 vibrantBlue = vec3(0.15, 0.4, 0.95);
+                    vec3 electricOrange = vec3(0.95, 0.45, 0.25);
+                    vec3 richViolet = vec3(0.5, 0.2, 0.8);
+                    vec3 darkBase = vec3(0.08, 0.05, 0.15);
+                    
+                    // Create flowing color transitions
+                    float colorFlow1 = smoothstep(-0.8, 0.8, combinedNoise + sin(t * 0.5 + p.x) * 0.3);
+                    float colorFlow2 = smoothstep(-0.8, 0.8, combinedNoise + cos(t * 0.4 + p.y) * 0.3);
+                    float colorFlow3 = smoothstep(-1.0, 1.0, noise3 + length(p) * 0.5);
+                    
+                    // Multi-layer color mixing for organic feel
+                    vec3 color = mix(deepPurple, vibrantBlue, colorFlow1);
+                    color = mix(color, richViolet, colorFlow2 * 0.6);
+                    color = mix(color, electricOrange, colorFlow3 * 0.25);
+                    color = mix(color, darkBase, (1.0 - colorFlow1) * 0.3);
+                    
+                    // Add subtle animated glow
+                    float distFromCenter = length(p);
+                    float glow = (1.0 - distFromCenter * 0.4) * (0.5 + sin(t * 0.3) * 0.2);
+                    color += vec3(0.15, 0.08, 0.2) * glow * smoothstep(1.5, 0.0, distFromCenter);
+                    
+                    // Enhanced vignette for depth
+                    float vignette = smoothstep(1.8, 0.2, distFromCenter);
+                    color *= vignette * 0.9 + 0.1;
+                    
+                    // Add subtle color shifts based on position
+                    color += vec3(0.05, 0.02, 0.08) * sin(p.x * 2.0 + t * 0.3);
+                    color += vec3(0.02, 0.05, 0.1) * cos(p.y * 2.0 + t * 0.4);
+                    
+                    // Smooth opacity for premium look
+                    float alpha = 0.5 + smoothstep(0.0, 1.0, vignette) * 0.2;
+                    
+                    gl_FragColor = vec4(color, alpha);
+                }
+            `;
+
+            // Compile shader
+            const compileShader = (source, type) => {
+                const shader = gl.createShader(type);
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    console.error('Shader compilation error:', gl.getShaderInfoLog(shader));
+                    gl.deleteShader(shader);
+                    return null;
+                }
+                return shader;
+            };
+
+            const vertexShader = compileShader(vertexShaderSource, gl.VERTEX_SHADER);
+            const fragmentShader = compileShader(fragmentShaderSource, gl.FRAGMENT_SHADER);
+
+            if (!vertexShader || !fragmentShader) {
+                console.error('Failed to compile shaders');
+            } else {
+                // Create program
+                const program = gl.createProgram();
+                gl.attachShader(program, vertexShader);
+                gl.attachShader(program, fragmentShader);
+                gl.linkProgram(program);
+
+                if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                    console.error('Program linking error:', gl.getProgramInfoLog(program));
+                } else {
+                    gl.useProgram(program);
+
+                    // Create fullscreen quad
+                    const positions = new Float32Array([
+                        -1, -1,
+                        1, -1,
+                        -1, 1,
+                        1, 1,
+                    ]);
+
+                    const buffer = gl.createBuffer();
+                    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+                    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+
+                    const positionLocation = gl.getAttribLocation(program, 'position');
+                    gl.enableVertexAttribArray(positionLocation);
+                    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+                    // Get uniform locations
+                    const uTimeLocation = gl.getUniformLocation(program, 'uTime');
+                    const uResolutionLocation = gl.getUniformLocation(program, 'uResolution');
+
+                    // Enable blending for transparency
+                    gl.enable(gl.BLEND);
+                    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+                    // Animation loop
+                    let startTime = Date.now();
+
+                    const animate = () => {
+                        const currentTime = (Date.now() - startTime) / 1000;
+
+                        gl.uniform1f(uTimeLocation, currentTime);
+                        gl.uniform2f(uResolutionLocation, canvas.width, canvas.height);
+
+                        gl.clearColor(0, 0, 0, 0);
+                        gl.clear(gl.COLOR_BUFFER_BIT);
+                        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+                        requestAnimationFrame(animate);
+                    };
+
+                    animate();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
